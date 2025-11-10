@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"be-internship/config"
 	"be-internship/controller"
 	"be-internship/model"
-	"be-internship/config"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -43,6 +43,4 @@ func KategoriRoutes(router fiber.Router) {
 	kategoriRoutes.Get("/:id", controller.GetCategoryByID)
 	kategoriRoutes.Put("/:id", controller.UpdateCategory)
 	kategoriRoutes.Delete("/:id", controller.DeleteCategoryByID)
-
-
 }
