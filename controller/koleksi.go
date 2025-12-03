@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"be-internship/config"
+	"be-internship/model"
 	"bytes"
 	"context"
 	"encoding/base64"
@@ -11,9 +13,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"be-internship/config"
-	"be-internship/model"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,17 +26,43 @@ func InsertKoleksi(c *fiber.Ctx) error {
 	namaBenda := c.FormValue("nama_benda")
 	kategoriID := c.FormValue("kategori_id") // 🔹 ambil ID kategori, bukan nama
 	bahan := c.FormValue("bahan")
-	ukuran := c.FormValue("ukuran")
+	// ukuran := c.FormValue("ukuran")
+	ukuran := model.Ukuran{
+		PanjangKeseluruhan: c.FormValue("panjang_keseluruhan"),
+		Lebar:              c.FormValue("lebar"),
+		Tebal:              c.FormValue("tebal"),
+		Tinggi:             c.FormValue("tinggi"),
+		Diameter:           c.FormValue("diameter"),
+		Berat:              c.FormValue("berat"),
+	}
 	tahunPerolehan := c.FormValue("tahun_perolehan")
 	asalPerolehan := c.FormValue("asal_perolehan")
 	ket := c.FormValue("ket")
 	tempat := c.FormValue("tempat_penyimpanan")
 
-	if noReg == "" || noInv == "" || namaBenda == "" || kategoriID == "" {
+	if noReg == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Field penting tidak boleh kosong (no_reg, no_inv, nama_benda, kategori_id).",
+			"error": "No registrasi tidak boleh kosong.",
 		})
 	}
+
+	if noInv == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "No inventaris tidak boleh kosong.",
+		})
+	}
+
+	if namaBenda == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Nama benda tidak boleh kosong.",
+		})
+	}
+
+	// if noReg == "" || noInv == "" || namaBenda == "" || kategoriID == "" {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	// 		"error": "Field penting tidak boleh kosong (no_reg, no_inv, nama_benda, kategori_id).",
+	// 	})
+	// }
 
 	// 🔹 Cek kategori berdasarkan ID
 	objID, err := primitive.ObjectIDFromHex(kategoriID)
@@ -80,7 +105,7 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		NoRegistrasi:      noReg,
 		NoInventaris:      noInv,
 		NamaBenda:         namaBenda,
-		Kategori:          kategori, // isi dengan hasil pencarian
+		Kategori:          kategori,
 		Bahan:             bahan,
 		Ukuran:            ukuran,
 		TahunPerolehan:    tahunPerolehan,
@@ -104,7 +129,6 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		"image_url": imageURL,
 	})
 }
-
 
 // =============================================================
 // 🟣 Fungsi Upload Gambar ke GitHub
@@ -190,8 +214,8 @@ func GetAllKoleksi(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message":  "Berhasil mengambil semua data koleksi",
-		"data":     koleksi,
+		"message": "Berhasil mengambil semua data koleksi",
+		"data":    koleksi,
 	})
 }
 
@@ -224,12 +248,12 @@ func GetKoleksiByID(c *fiber.Ctx) error {
 
 	// Return hasil
 	return c.JSON(fiber.Map{
-		"message":  "Berhasil mengambil data koleksi",
-		"data":     koleksi,
+		"message": "Berhasil mengambil data koleksi",
+		"data":    koleksi,
 	})
 }
 
-//update koleksi
+// update koleksi
 func UpdateKoleksi(c *fiber.Ctx) error {
 	id := c.Params("id") // ambil ID koleksi dari parameter URL
 
@@ -260,11 +284,29 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	namaBenda := c.FormValue("nama_benda")
 	kategoriID := c.FormValue("kategori_id")
 	bahan := c.FormValue("bahan")
-	ukuran := c.FormValue("ukuran")
+	// ukuran := c.FormValue("ukuran")
+	// 🔹 Ambil data ukuran (panjang, lebar, tinggi, diameter)
+	lebar := c.FormValue("lebar")
+	tebal := c.FormValue("tebal")
+	tinggi := c.FormValue("tinggi")
+	diameter := c.FormValue("diameter")
+	berat := c.FormValue("berat")
+	panjangkeseluruhan := c.FormValue("panjang_keseluruhan")
+
 	tahunPerolehan := c.FormValue("tahun_perolehan")
 	asalPerolehan := c.FormValue("asal_perolehan")
 	ket := c.FormValue("ket")
 	tempat := c.FormValue("tempat_penyimpanan")
+
+	// 🔹 Bentuk struct ukuran baru
+	newUkuran := model.Ukuran{
+		Lebar:              ifNotEmpty(lebar, existing.Ukuran.Lebar),
+		Tebal:              ifNotEmpty(tebal, existing.Ukuran.Tebal),
+		Tinggi:             ifNotEmpty(tinggi, existing.Ukuran.Tinggi),
+		Diameter:           ifNotEmpty(diameter, existing.Ukuran.Diameter),
+		Berat:              ifNotEmpty(berat, existing.Ukuran.Berat),
+		PanjangKeseluruhan: ifNotEmpty(panjangkeseluruhan, existing.Ukuran.PanjangKeseluruhan),
+	}
 
 	// 🔹 Validasi kategori baru (kalau diisi)
 	var kategori model.Kategori
@@ -309,7 +351,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		"nama_benda":         ifNotEmpty(namaBenda, existing.NamaBenda),
 		"kategori":           kategori,
 		"bahan":              ifNotEmpty(bahan, existing.Bahan),
-		"ukuran":             ifNotEmpty(ukuran, existing.Ukuran),
+		"ukuran":             newUkuran,
 		"tahun_perolehan":    ifNotEmpty(tahunPerolehan, existing.TahunPerolehan),
 		"asal_perolehan":     ifNotEmpty(asalPerolehan, existing.AsalPerolehan),
 		"keterangan":         ifNotEmpty(ket, existing.Keterangan),
@@ -339,7 +381,6 @@ func ifNotEmpty(newValue, oldValue string) string {
 	}
 	return oldValue
 }
-
 
 func DeleteKoleksiByID(c *fiber.Ctx) error {
 	// Ambil ID dari parameter URL
@@ -377,4 +418,3 @@ func DeleteKoleksiByID(c *fiber.Ctx) error {
 		"message": fmt.Sprintf("Koleksi dengan ID %s berhasil dihapus", idParam),
 	})
 }
-

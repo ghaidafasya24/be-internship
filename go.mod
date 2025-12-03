@@ -8,6 +8,7 @@ require (
 	github.com/aiteung/atdb v0.1.7
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.6
 	golang.org/x/crypto v0.43.0
 )

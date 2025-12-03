@@ -9,27 +9,28 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	// Load environment variables
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000" // Default port jika PORT tidak diset
+		port = "3000"
 	}
-	// Create a new Fiber app
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️  Tidak dapat memuat .env, menggunakan environment variable sistem...")
+	}
+
 	app := fiber.New()
 
-	// Middleware untuk logging
 	app.Use(logger.New())
-
-	// Middleware untuk CORS
 	app.Use(cors.New(config.Cors))
 
-	// Setup routes
 	route.SetupRoutes(app)
 
-	// Start the server
 	log.Printf("🚀 Server is running on http://localhost:%s", port)
 	log.Fatal(app.Listen(":" + port))
 }
