@@ -4,6 +4,7 @@ import (
 	"be-internship/controller"
 
 	"github.com/gofiber/fiber/v2"
+
 )
 
 // SetupRoutes initializes all the application routes
@@ -13,14 +14,13 @@ func SetupRoutes(app *fiber.App) {
 
 	// User routes
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", controller.Register) // Route untuk registrasi pengguna
-	userRoutes.Post("/login", controller.Login)       // Route untuk login pengguna
-	userRoutes.Get("/", controller.GetAllUsers)       // Route untuk mengambil data pengguna
+	userRoutes.Post("/register", controller.Register)          // Route untuk registrasi pengguna
+	userRoutes.Post("/login", controller.Login)                // Route untuk login pengguna
+	userRoutes.Get("/", controller.GetAllUsers)                // Route untuk mengambil data pengguna
+	userRoutes.Get("/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
 
 	// Koleksi routes
 	koleksiRoutes := api.Group("/koleksi")
-	// Insert
-
 	koleksiRoutes.Post("/", controller.InsertKoleksi)
 	koleksiRoutes.Get("/", controller.GetAllKoleksi)
 	koleksiRoutes.Get("/:id", controller.GetKoleksiByID)

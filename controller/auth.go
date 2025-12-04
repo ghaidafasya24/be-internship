@@ -225,5 +225,44 @@ func GetAllUsers(c *fiber.Ctx) error {
 	})
 }
 
+// GET USER BY USERNAME
+func GetUserByUsername(c *fiber.Ctx) error {
+    username := c.Params("username")
+    if username == "" {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "error": "Username wajib diisi",
+        })
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    usersCollection := config.Ulbimongoconn.Client().
+        Database(config.DBUlbimongoinfo.DBName).
+        Collection("users")
+
+    var user model.Users
+    err := usersCollection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
+    if err != nil {
+        if err == mongo.ErrNoDocuments {
+            return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+                "error": "User tidak ditemukan",
+            })
+        }
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+            "error": "Gagal mengambil data user",
+        })
+    }
+
+    // Hapus password sebelum dikirim
+    user.Password = ""
+
+    return c.Status(fiber.StatusOK).JSON(fiber.Map{
+        "message": "User ditemukan",
+        "data":    user,
+    })
+}
+
+
 
 
