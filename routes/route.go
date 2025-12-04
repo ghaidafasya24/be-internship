@@ -17,17 +17,14 @@ func SetupRoutes(app *fiber.App) {
 	userRoutes.Post("/login", controller.Login)       // Route untuk login pengguna
 
 	// Koleksi routes
-	koleksiRoutes := api.Group("/koleksi")     
-	// Insert                                                                                                                                            
+	koleksiRoutes := api.Group("/koleksi")
+	// Insert
 
 	koleksiRoutes.Post("/", controller.InsertKoleksi)
 	koleksiRoutes.Get("/", controller.GetAllKoleksi)
 	koleksiRoutes.Get("/:id", controller.GetKoleksiByID)
 	koleksiRoutes.Put("/:id", controller.UpdateKoleksi)
 	koleksiRoutes.Delete("/:id", controller.DeleteKoleksiByID)
-
-	
-
 
 	// Tambahkan kategori route
 	KategoriRoutes(api)

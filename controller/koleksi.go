@@ -24,21 +24,25 @@ func InsertKoleksi(c *fiber.Ctx) error {
 	noReg := c.FormValue("no_reg")
 	noInv := c.FormValue("no_inv")
 	namaBenda := c.FormValue("nama_benda")
+	tanggalPerolehan := c.FormValue("tanggal_perolehan")
 	kategoriID := c.FormValue("kategori_id") // 🔹 ambil ID kategori, bukan nama
 	bahan := c.FormValue("bahan")
 	// ukuran := c.FormValue("ukuran")
 	ukuran := model.Ukuran{
+		ID:                 primitive.NewObjectID(),
 		PanjangKeseluruhan: c.FormValue("panjang_keseluruhan"),
 		Lebar:              c.FormValue("lebar"),
 		Tebal:              c.FormValue("tebal"),
 		Tinggi:             c.FormValue("tinggi"),
 		Diameter:           c.FormValue("diameter"),
 		Berat:              c.FormValue("berat"),
+		CreatedAt:          time.Now(), // ❗ WAJIB
 	}
-	tahunPerolehan := c.FormValue("tahun_perolehan")
-	asalPerolehan := c.FormValue("asal_perolehan")
-	ket := c.FormValue("ket")
-	tempat := c.FormValue("tempat_penyimpanan")
+	asalKoleksi := c.FormValue("asal_koleksi")
+	tempatPerolehan := c.FormValue("tempat_perolehan")
+	deskripsi := c.FormValue("deskripsi")
+	tempatPenyimpanan := c.FormValue("tempat_penyimpanan")
+	Kondisi := c.FormValue("kondisi")
 
 	if noReg == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -102,16 +106,18 @@ func InsertKoleksi(c *fiber.Ctx) error {
 	// 🔹 Buat data koleksi
 	data := model.Koleksi{
 		ID:                primitive.NewObjectID(),
+		Kategori:          kategori,
 		NoRegistrasi:      noReg,
 		NoInventaris:      noInv,
 		NamaBenda:         namaBenda,
-		Kategori:          kategori,
+		AsalKoleksi:       asalKoleksi,
 		Bahan:             bahan,
 		Ukuran:            ukuran,
-		TahunPerolehan:    tahunPerolehan,
-		AsalPerolehan:     asalPerolehan,
-		Keterangan:        ket,
-		TempatPenyimpanan: tempat,
+		TempatPerolehan:   tempatPerolehan,
+		TanggalPerolehan:  tanggalPerolehan,
+		Deskripsi:         deskripsi,
+		TempatPenyimpanan: tempatPenyimpanan,
+		Kondisi:           Kondisi,
 		Foto:              imageURL,
 		CreatedAt:         time.Now(),
 	}
@@ -279,10 +285,10 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	}
 
 	// 🔹 Ambil data baru dari form
+	kategoriID := c.FormValue("kategori_id")
 	noReg := c.FormValue("no_reg")
 	noInv := c.FormValue("no_inv")
 	namaBenda := c.FormValue("nama_benda")
-	kategoriID := c.FormValue("kategori_id")
 	bahan := c.FormValue("bahan")
 	// ukuran := c.FormValue("ukuran")
 	// 🔹 Ambil data ukuran (panjang, lebar, tinggi, diameter)
@@ -292,14 +298,16 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	diameter := c.FormValue("diameter")
 	berat := c.FormValue("berat")
 	panjangkeseluruhan := c.FormValue("panjang_keseluruhan")
-
-	tahunPerolehan := c.FormValue("tahun_perolehan")
-	asalPerolehan := c.FormValue("asal_perolehan")
-	ket := c.FormValue("ket")
-	tempat := c.FormValue("tempat_penyimpanan")
+	tempatPerolehan := c.FormValue("tempat_perolehan")
+	tanggalPerolehan := c.FormValue("tanggal_perolehan")
+	asalKoleksi := c.FormValue("asal_koleksi")
+	deskripsi := c.FormValue("deskripsi")
+	tempatPenyimpanan := c.FormValue("tempat_penyimpanan")
+	kondisi := c.FormValue("kondisi")
 
 	// 🔹 Bentuk struct ukuran baru
 	newUkuran := model.Ukuran{
+		ID:                 primitive.NewObjectID(),
 		Lebar:              ifNotEmpty(lebar, existing.Ukuran.Lebar),
 		Tebal:              ifNotEmpty(tebal, existing.Ukuran.Tebal),
 		Tinggi:             ifNotEmpty(tinggi, existing.Ukuran.Tinggi),
@@ -346,16 +354,18 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 
 	// 🔹 Siapkan data update
 	updateData := bson.M{
-		"no_registrasi":      ifNotEmpty(noReg, existing.NoRegistrasi),
-		"no_inventaris":      ifNotEmpty(noInv, existing.NoInventaris),
-		"nama_benda":         ifNotEmpty(namaBenda, existing.NamaBenda),
 		"kategori":           kategori,
+		"no_reg":             ifNotEmpty(noReg, existing.NoRegistrasi),
+		"no_inv":             ifNotEmpty(noInv, existing.NoInventaris),
+		"nama_benda":         ifNotEmpty(namaBenda, existing.NamaBenda),
+		"asal_koleksi":       ifNotEmpty(asalKoleksi, existing.AsalKoleksi),
 		"bahan":              ifNotEmpty(bahan, existing.Bahan),
 		"ukuran":             newUkuran,
-		"tahun_perolehan":    ifNotEmpty(tahunPerolehan, existing.TahunPerolehan),
-		"asal_perolehan":     ifNotEmpty(asalPerolehan, existing.AsalPerolehan),
-		"keterangan":         ifNotEmpty(ket, existing.Keterangan),
-		"tempat_penyimpanan": ifNotEmpty(tempat, existing.TempatPenyimpanan),
+		"tempat_perolehan":   ifNotEmpty(tempatPerolehan, existing.TempatPerolehan),
+		"tanggal_perolehan":  ifNotEmpty(tanggalPerolehan, existing.TanggalPerolehan),
+		"deskripsi":          ifNotEmpty(deskripsi, existing.Deskripsi),
+		"tempat_penyimpanan": ifNotEmpty(tempatPenyimpanan, existing.TempatPenyimpanan),
+		"kondisi":            ifNotEmpty(kondisi, existing.Kondisi),
 		"foto":               imageURL,
 		"updated_at":         time.Now(),
 	}
