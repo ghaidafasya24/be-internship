@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"be-internship/model"
 	"be-internship/config"
+	"be-internship/model"
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"github.com/gofiber/fiber/v2"
 )
 
 // ✅ Fungsi untuk menambahkan kategori baru
@@ -58,8 +58,8 @@ func GetAllCategory(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message":  "Berhasil mengambil semua data kategori",
-		"data":     categories,
+		"message": "Berhasil mengambil semua data kategori",
+		"data":    categories,
 	})
 }
 
@@ -94,7 +94,7 @@ func GetCategoryByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(kategori)
 }
 
-//update kategori
+// update kategori
 func UpdateCategory(c *fiber.Ctx) error {
 	// Ambil ID dari parameter URL
 	idParam := c.Params("id")
@@ -113,9 +113,20 @@ func UpdateCategory(c *fiber.Ctx) error {
 		})
 	}
 
-	if updateData.NamaKategori == "" {
+	// Buat map untuk field yang mau diupdate
+	updateFields := bson.M{}
+
+	if updateData.NamaKategori != "" {
+		updateFields["nama_kategori"] = updateData.NamaKategori
+	}
+
+	if updateData.Deskripsi != "" {
+		updateFields["deskripsi"] = updateData.Deskripsi
+	}
+
+	if len(updateFields) == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Nama kategori wajib diisi",
+			"error": "Tidak ada field yang diupdate",
 		})
 	}
 
@@ -124,7 +135,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 	col := db.Collection("kategori")
 
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"nama_kategori": updateData.NamaKategori}}
+	update := bson.M{"$set": updateFields}
 
 	result, err := col.UpdateOne(context.Background(), filter, update)
 	if err != nil {
