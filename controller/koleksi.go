@@ -88,20 +88,37 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		})
 	}
 
-	// 🔹 Upload gambar
+	// 🔹 Upload gambar OPSIONAL
+	var imageURL string
+
 	file, err := c.FormFile("foto")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "File foto wajib diunggah.",
-		})
+	if err == nil && file != nil {
+		// Jika ada file → upload ke GitHub
+		imageURL, err = uploadImageToGitHub(file, namaBenda)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": fmt.Sprintf("Gagal upload gambar ke GitHub: %v", err),
+			})
+		}
+	} else {
+		// Jika TIDAK ada file → kosongkan
+		imageURL = ""
 	}
 
-	imageURL, err := uploadImageToGitHub(file, namaBenda)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal upload gambar ke GitHub: %v", err),
-		})
-	}
+	// 🔹 Upload gambar
+	// file, err := c.FormFile("foto")
+	// if err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	// 		"error": "File foto wajib diunggah.",
+	// 	})
+	// }
+
+	// imageURL, err := uploadImageToGitHub(file, namaBenda)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": fmt.Sprintf("Gagal upload gambar ke GitHub: %v", err),
+	// 	})
+	// }
 
 	// 🔹 Buat data koleksi
 	data := model.Koleksi{

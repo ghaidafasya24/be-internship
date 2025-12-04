@@ -15,6 +15,7 @@ func SetupRoutes(app *fiber.App) {
 	userRoutes := api.Group("/users")
 	userRoutes.Post("/register", controller.Register) // Route untuk registrasi pengguna
 	userRoutes.Post("/login", controller.Login)       // Route untuk login pengguna
+	userRoutes.Get("/", controller.GetAllUsers)       // Route untuk mengambil data pengguna
 
 	// Koleksi routes
 	koleksiRoutes := api.Group("/koleksi")

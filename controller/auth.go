@@ -183,4 +183,47 @@ func JWTAuth(c *fiber.Ctx) error {
 	}) // Jika tidak valid
 }
 
+// GET ALL USERS
+func GetAllUsers(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Ambil collection users
+	usersCollection := config.Ulbimongoconn.Client().Database(config.DBUlbimongoinfo.DBName).Collection("users")
+
+	// Query semua data
+	cursor, err := usersCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mengambil data users",
+		})
+	}
+	defer cursor.Close(ctx)
+
+	// Decode hasil cursor
+	var users []model.Users
+	for cursor.Next(ctx) {
+		var user model.Users
+		if err := cursor.Decode(&user); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Gagal decode data user",
+			})
+		}
+
+		// Hapus password dari response
+		user.Password = ""
+		// Jika tidak ingin menampilkan nomor HP:
+		// user.PhoneNumber = ""
+
+		users = append(users, user)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Berhasil mengambil semua users",
+		"total":   len(users),
+		"data":    users,
+	})
+}
+
+
 
