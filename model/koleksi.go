@@ -33,5 +33,5 @@ type Ukuran struct {
 	Diameter           string             `json:"diameter,omitempty" bson:"diameter,omitempty"`
 	Berat              string             `json:"berat,omitempty" bson:"berat,omitempty"`
 	PanjangKeseluruhan string             `json:"panjang_keseluruhan,omitempty" bson:"panjang_keseluruhan,omitempty"`
-	CreatedAt          time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	// CreatedAt          time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }

@@ -3,10 +3,11 @@ package controller
 import (
 	"be-internship/config"
 	"be-internship/model"
+	"errors"
+	"strings"
+
 	// "be-internship/model"
 	"context"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 // REGISTER
@@ -132,14 +132,27 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	// Generate JWT Token
-	expirationTime := time.Now().Add(24 * time.Hour) // Token berlaku selama 24 jam
+	// // Generate JWT Token
+	// expirationTime := time.Now().Add(24 * time.Hour) // Token berlaku selama 24 jam
+	// claims := &Claims{
+	// 	Username: user.Username,
+	// 	RegisteredClaims: jwt.RegisteredClaims{
+	// 		ExpiresAt: jwt.NewNumericDate(expirationTime),
+	// 	},
+	// }
+
+	// Generate JWT Token dengan masa berlaku 30 menit
+	expirationTime := time.Now().Add(30 * time.Minute)
 	claims := &Claims{
+		UserID:   user.ID.Hex(),
 		Username: user.Username,
+		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
@@ -154,6 +167,7 @@ func Login(c *fiber.Ctx) error {
 		"status":  200,
 		"role":    user.Role,
 		"token":   tokenString,
+		"expires": expirationTime,
 	})
 }
 
@@ -170,18 +184,90 @@ func ValidateToken(tokenString string) (bool, error) {
 
 // JWTAuth middleware untuk memverifikasi token di Fiber
 func JWTAuth(c *fiber.Ctx) error {
-	bearerToken := c.Get("Authorization") // Ambil Authorization header
-	sttArr := strings.Split(bearerToken, " ")
-	if len(sttArr) == 2 {
-		isValid, _ := ValidateToken(sttArr[1]) // Validasi token
-		if isValid {
-			return c.Next() // Lanjutkan ke handler berikutnya jika token valid
-		}
+
+	// Ambil header Authorization
+	bearerToken := c.Get("Authorization")
+	if bearerToken == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "token tidak ditemukan",
+		})
 	}
-	return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-		"message": "Unauthorized",
-	}) // Jika tidak valid
+
+	// Format harus: "Bearer <token>"
+	tokenParts := strings.Split(bearerToken, " ")
+	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "token tidak valid (format salah)",
+		})
+	}
+
+	tokenString := tokenParts[1]
+
+	// Parse token dan ambil claims
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	// Jika token rusak / signature salah
+	if err != nil {
+		// CEK APAKAH EXPIRED
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"message": "token expired",
+			})
+		}
+
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "token tidak valid",
+		})
+	}
+
+	// Jika token tidak valid (false)
+	if !token.Valid {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "token tidak valid",
+		})
+	}
+
+	// Jika valid → lanjutkan handler berikutnya
+	return c.Next()
 }
+
+// func JWTAuth(c *fiber.Ctx) error {
+// 	bearer := c.Get("Authorization")
+
+// 	if bearer == "" {
+// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+// 			"message": "Unauthorized: Token tidak ditemukan",
+// 		})
+// 	}
+
+// 	parts := strings.Split(bearer, " ")
+// 	if len(parts) != 2 {
+// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+// 			"message": "Unauthorized: Format token salah",
+// 		})
+// 	}
+
+// 	tokenString := parts[1]
+
+// 	token, err := ValidateToken(tokenString)
+// 	if err != nil {
+// 		// Token expired
+// 		if errors.Is(err, jwt.ErrTokenExpired) {
+// 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+// 				"message": "Unauthorized: Token expired",
+// 			})
+// 		}
+
+// 		// Token tidak valid
+// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+// 			"message": "Unauthorized: Token tidak valid",
+// 		})
+// 	}
+
+// 	return c.Next()
+// }
 
 // GET ALL USERS
 func GetAllUsers(c *fiber.Ctx) error {
@@ -227,42 +313,38 @@ func GetAllUsers(c *fiber.Ctx) error {
 
 // GET USER BY USERNAME
 func GetUserByUsername(c *fiber.Ctx) error {
-    username := c.Params("username")
-    if username == "" {
-        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-            "error": "Username wajib diisi",
-        })
-    }
+	username := c.Params("username")
+	if username == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username wajib diisi",
+		})
+	}
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    usersCollection := config.Ulbimongoconn.Client().
-        Database(config.DBUlbimongoinfo.DBName).
-        Collection("users")
+	usersCollection := config.Ulbimongoconn.Client().
+		Database(config.DBUlbimongoinfo.DBName).
+		Collection("users")
 
-    var user model.Users
-    err := usersCollection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
-    if err != nil {
-        if err == mongo.ErrNoDocuments {
-            return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-                "error": "User tidak ditemukan",
-            })
-        }
-        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-            "error": "Gagal mengambil data user",
-        })
-    }
+	var user model.Users
+	err := usersCollection.FindOne(ctx, bson.M{"username": username}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "User tidak ditemukan",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mengambil data user",
+		})
+	}
 
-    // Hapus password sebelum dikirim
-    user.Password = ""
+	// Hapus password sebelum dikirim
+	user.Password = ""
 
-    return c.Status(fiber.StatusOK).JSON(fiber.Map{
-        "message": "User ditemukan",
-        "data":    user,
-    })
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User ditemukan",
+		"data":    user,
+	})
 }
-
-
-
-

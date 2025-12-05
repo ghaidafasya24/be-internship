@@ -21,6 +21,7 @@ import (
 
 // Fungsi utama untuk insert koleksi (pakai form-data)
 func InsertKoleksi(c *fiber.Ctx) error {
+
 	noReg := c.FormValue("no_reg")
 	noInv := c.FormValue("no_inv")
 	namaBenda := c.FormValue("nama_benda")
@@ -36,7 +37,7 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		Tinggi:             c.FormValue("tinggi"),
 		Diameter:           c.FormValue("diameter"),
 		Berat:              c.FormValue("berat"),
-		CreatedAt:          time.Now(), // ❗ WAJIB
+		// CreatedAt:          time.Now(), // ❗ WAJIB
 	}
 	asalKoleksi := c.FormValue("asal_koleksi")
 	tempatPerolehan := c.FormValue("tempat_perolehan")
@@ -415,7 +416,7 @@ func DeleteKoleksiByID(c *fiber.Ctx) error {
 	id, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID tidak valid",
+			"error": "ID koleksi tidak valid",
 		})
 	}
 

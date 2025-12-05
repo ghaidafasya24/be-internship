@@ -4,7 +4,6 @@ import (
 	"be-internship/controller"
 
 	"github.com/gofiber/fiber/v2"
-
 )
 
 // SetupRoutes initializes all the application routes
@@ -21,11 +20,11 @@ func SetupRoutes(app *fiber.App) {
 
 	// Koleksi routes
 	koleksiRoutes := api.Group("/koleksi")
-	koleksiRoutes.Post("/", controller.InsertKoleksi)
+	koleksiRoutes.Post("/", controller.JWTAuth, controller.InsertKoleksi)
 	koleksiRoutes.Get("/", controller.GetAllKoleksi)
 	koleksiRoutes.Get("/:id", controller.GetKoleksiByID)
-	koleksiRoutes.Put("/:id", controller.UpdateKoleksi)
-	koleksiRoutes.Delete("/:id", controller.DeleteKoleksiByID)
+	koleksiRoutes.Put("/:id", controller.JWTAuth, controller.UpdateKoleksi)
+	koleksiRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteKoleksiByID)
 
 	// Tambahkan kategori route
 	KategoriRoutes(api)
