@@ -17,6 +17,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
 )
 
 // Fungsi utama untuk insert koleksi (pakai form-data)
@@ -239,6 +240,7 @@ func GetAllKoleksi(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "Berhasil mengambil semua data koleksi",
+		"total":   len(koleksi),
 		"data":    koleksi,
 	})
 }
@@ -410,6 +412,7 @@ func ifNotEmpty(newValue, oldValue string) string {
 	return oldValue
 }
 
+// delete koleksi by ID
 func DeleteKoleksiByID(c *fiber.Ctx) error {
 	// Ambil ID dari parameter URL
 	idParam := c.Params("id")
