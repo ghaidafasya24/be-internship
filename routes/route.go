@@ -13,10 +13,11 @@ func SetupRoutes(app *fiber.App) {
 
 	// User routes
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", controller.Register)          // Route untuk registrasi pengguna
-	userRoutes.Post("/login", controller.Login)                // Route untuk login pengguna
-	userRoutes.Get("/", controller.GetAllUsers)                // Route untuk mengambil data pengguna
-	userRoutes.Get("/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
+	userRoutes.Post("/register", controller.Register)                        // Route untuk registrasi pengguna
+	userRoutes.Post("/login", controller.Login)                              // Route untuk login pengguna
+	userRoutes.Get("/", controller.GetAllUsers)                              // Route untuk mengambil data pengguna
+	userRoutes.Get("/:username", controller.GetUserByUsername)               // Route untuk mengambil data pengguna berdasarkan username
+	userRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteUserByID) // Route untuk menghapus data pengguna berdasarkan ID
 
 	// Koleksi routes
 	koleksiRoutes := api.Group("/koleksi")

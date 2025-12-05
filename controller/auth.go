@@ -233,42 +233,6 @@ func JWTAuth(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// func JWTAuth(c *fiber.Ctx) error {
-// 	bearer := c.Get("Authorization")
-
-// 	if bearer == "" {
-// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-// 			"message": "Unauthorized: Token tidak ditemukan",
-// 		})
-// 	}
-
-// 	parts := strings.Split(bearer, " ")
-// 	if len(parts) != 2 {
-// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-// 			"message": "Unauthorized: Format token salah",
-// 		})
-// 	}
-
-// 	tokenString := parts[1]
-
-// 	token, err := ValidateToken(tokenString)
-// 	if err != nil {
-// 		// Token expired
-// 		if errors.Is(err, jwt.ErrTokenExpired) {
-// 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-// 				"message": "Unauthorized: Token expired",
-// 			})
-// 		}
-
-// 		// Token tidak valid
-// 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-// 			"message": "Unauthorized: Token tidak valid",
-// 		})
-// 	}
-
-// 	return c.Next()
-// }
-
 // GET ALL USERS
 func GetAllUsers(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -346,5 +310,62 @@ func GetUserByUsername(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "User ditemukan",
 		"data":    user,
+	})
+}
+
+// DELETE USER BY ID
+func DeleteUserByID(c *fiber.Ctx) error {
+	// Ambil ID dari parameter URL
+	idParam := c.Params("id")
+	if idParam == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID user wajib diisi",
+		})
+	}
+
+	// Convert string ID ke ObjectID Mongo
+	userID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID user tidak valid",
+		})
+	}
+
+	// Koneksi ke DB
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	usersCollection := config.
+		Ulbimongoconn.
+		Client().
+		Database(config.DBUlbimongoinfo.DBName).
+		Collection("users")
+
+	// Cek apakah user ada
+	var existingUser model.Users
+	err = usersCollection.FindOne(ctx, bson.M{"_id": userID}).Decode(&existingUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "User tidak ditemukan",
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengambil data user",
+		})
+	}
+
+	// Hapus user
+	_, err = usersCollection.DeleteOne(ctx, bson.M{"_id": userID})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal menghapus user",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User berhasil dihapus",
+		"id":      idParam,
 	})
 }
