@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"be-internship/config"
 	"be-internship/controller"
 	"be-internship/model"
 
@@ -26,21 +25,21 @@ func KategoriRoutes(router fiber.Router) {
 			})
 		}
 
-		id, err := controller.InsertCategory(config.Ulbimongoconn, "kategori", data)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Gagal menambah kategori",
-			})
-		}
+		// id, err := controller.InsertCategory(config.Ulbimongoconn, "kategori", data)
+		// if err != nil {
+		// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		// 		"error": "Gagal menambah kategori",
+		// 	})
+		// }
 
 		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 			"message": "Kategori berhasil ditambahkan",
-			"id":      id.Hex(),
+			// "id":      id.Hex(),
 		})
 	})
 
 	kategoriRoutes.Get("/", controller.GetAllCategory)
 	kategoriRoutes.Get("/:id", controller.GetCategoryByID)
-	kategoriRoutes.Put("/:id", controller.UpdateCategory)
-	kategoriRoutes.Delete("/:id", controller.DeleteCategoryByID)
+	// kategoriRoutes.Put("/:id", controller.UpdateCategory)
+	// kategoriRoutes.Delete("/:id", controller.DeleteCategoryByID)
 }

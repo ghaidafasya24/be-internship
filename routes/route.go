@@ -13,10 +13,11 @@ func SetupRoutes(app *fiber.App) {
 
 	// User routes
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", controller.Register)                        // Route untuk registrasi pengguna
-	userRoutes.Post("/login", controller.Login)                              // Route untuk login pengguna
-	userRoutes.Get("/", controller.GetAllUsers)                              // Route untuk mengambil data pengguna
-	userRoutes.Get("/:username", controller.GetUserByUsername)               // Route untuk mengambil data pengguna berdasarkan username
+	userRoutes.Post("/register", controller.Register)          // Route untuk registrasi pengguna
+	userRoutes.Post("/login", controller.Login)                // Route untuk login pengguna
+	userRoutes.Get("/", controller.GetAllUsers)                // Route untuk mengambil data pengguna
+	userRoutes.Get("/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
+	// userRoutes.Get("/:phone_number", controller.GetUserByPhoneNumber)        // Route untuk mengambil data pengguna berdasarkan nomor telepon
 	userRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteUserByID) // Route untuk menghapus data pengguna berdasarkan ID
 
 	// Koleksi routes
@@ -27,6 +28,11 @@ func SetupRoutes(app *fiber.App) {
 	koleksiRoutes.Put("/:id", controller.JWTAuth, controller.UpdateKoleksi)
 	koleksiRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteKoleksiByID)
 
-	// Tambahkan kategori route
-	KategoriRoutes(api)
+	// Kategori routes
+	kategoriRoutes := api.Group("/kategori")
+	kategoriRoutes.Post("/", controller.JWTAuth, controller.InsertKategori)
+	kategoriRoutes.Get("/", controller.GetAllCategory)
+	kategoriRoutes.Get("/:id", controller.GetCategoryByID)
+	kategoriRoutes.Put("/:id", controller.JWTAuth, controller.UpdateKategori)
+	kategoriRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteKategoriByID)
 }

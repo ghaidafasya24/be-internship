@@ -40,6 +40,30 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
+	// 🔹 VALIDASI FORMAT NOMOR TELEPON (HARUS 62)
+	phone := user.PhoneNumber
+
+	// Harus mulai dengan 62
+	if !strings.HasPrefix(phone, "62") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format nomor telepon harus dimulai dengan 62",
+		})
+	}
+
+	// Setelah 62 tidak boleh 0 → 6208... (SALAH)
+	if len(phone) > 2 && phone[2] == '0' {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Format nomor telepon tidak valid, gunakan format: 62xxxxxxxxxx (tanpa angka 0 setelah 62)",
+		})
+	}
+
+	// Minimal panjang nomor telepon
+	if len(phone) < 10 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Nomor telepon terlalu pendek",
+		})
+	}
+
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -82,7 +106,6 @@ func Register(c *fiber.Ctx) error {
 			"role": user.Role,
 		},
 	})
-
 }
 
 var jwtKey = []byte("secret_key!234@!#$%")
@@ -312,6 +335,44 @@ func GetUserByUsername(c *fiber.Ctx) error {
 		"data":    user,
 	})
 }
+
+// GET USER BY PHONE NUMBER
+// func GetUserByPhoneNumber(c *fiber.Ctx) error {
+// 	phoneNumber := c.Params("phone_number")
+// 	if phoneNumber == "" {
+// 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+// 			"error": "Nomor telepon wajib diisi",
+// 		})
+// 	}
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	usersCollection := config.Ulbimongoconn.Client().
+// 		Database(config.DBUlbimongoinfo.DBName).
+// 		Collection("users")
+
+// 	var user model.Users
+// 	err := usersCollection.FindOne(ctx, bson.M{"phone_number": phoneNumber}).Decode(&user)
+// 	if err != nil {
+// 		if err == mongo.ErrNoDocuments {
+// 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+// 				"error": "User tidak ditemukan",
+// 			})
+// 		}
+// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+// 			"error": "Gagal mengambil data user",
+// 		})
+// 	}
+
+// 	// Hapus password sebelum dikirim
+// 	user.Password = ""
+
+// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+// 		"message": "User ditemukan",
+// 		"data":    user,
+// 	})
+// }
 
 // DELETE USER BY ID
 func DeleteUserByID(c *fiber.Ctx) error {
