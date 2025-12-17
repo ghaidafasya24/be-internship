@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+
 )
 
 func main() {
@@ -18,6 +19,8 @@ func main() {
 	if port == "" {
 		port = "3000"
 	}
+
+	
 	// Load .env file
 	err := godotenv.Load()
 	if err != nil {

@@ -19,7 +19,7 @@ type Koleksi struct {
 	TempatPerolehan   string             `json:"tempat_perolehan,omitempty" bson:"tempat_perolehan,omitempty"`
 	TanggalPerolehan  string             `json:"tanggal_perolehan,omitempty" bson:"tanggal_perolehan,omitempty"`
 	Deskripsi         string             `json:"deskripsi,omitempty" bson:"deskripsi,omitempty"`
-	TempatPenyimpanan string             `json:"tempat_penyimpanan,omitempty" bson:"tempat_penyimpanan,omitempty"`
+	TempatPenyimpanan TempatPenyimpanan  `json:"tempat_penyimpanan,omitempty" bson:"tempat_penyimpanan,omitempty"`
 	Kondisi           string             `json:"kondisi,omitempty" bson:"kondisi,omitempty"`
 	Foto              string             `json:"foto,omitempty" bson:"foto,omitempty"`
 	CreatedAt         time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
@@ -34,4 +34,37 @@ type Ukuran struct {
 	Berat              string             `json:"berat,omitempty" bson:"berat,omitempty"`
 	PanjangKeseluruhan string             `json:"panjang_keseluruhan,omitempty" bson:"panjang_keseluruhan,omitempty"`
 	// CreatedAt          time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
+}
+
+//	type TempatPenyimpanan struct {
+//		ID     primitive.ObjectID `json:"id" bson:"_id"`
+//		Gudang string             `json:"gudang,omitempty" bson:"gudang,omitempty"`
+//	}
+
+type TempatPenyimpanan struct {
+	Gudang Gudang `json:"gudang,omitempty" bson:"gudang,omitempty"`
+	Rak    Rak    `json:"rak,omitempty" bson:"rak,omitempty"`
+	Tahap  Tahap  `json:"tahap,omitempty" bson:"tahap,omitempty"`
+	// ID     primitive.ObjectID `json:"id" bson:"_id"`
+	// Gudang Gudang `json:"gudang,omitempty" bson:"gudang,omitempty"`
+	// Rak    Rak    `json:"rak,omitempty" bson:"rak,omitempty"`
+	// Tahap  Tahap  `json:"tahap,omitempty" bson:"tahap,omitempty"`
+	// GudangID primitive.ObjectID `json:"gudang_id,omitempty" bson:"gudang_id,omitempty"`
+	// RakID    primitive.ObjectID `json:"rak_id,omitempty" bson:"rak_id,omitempty"`
+	// TahapID  primitive.ObjectID `json:"tahap_id,omitempty" bson:"tahap_id,omitempty"`
+}
+
+type Gudang struct {
+	ID         primitive.ObjectID `json:"id" bson:"_id"`
+	NamaGudang string             `json:"nama_gudang,omitempty" bson:"nama_gudang,omitempty"`
+}
+
+type Rak struct {
+	ID      primitive.ObjectID `json:"id" bson:"_id"`
+	NamaRak string             `json:"nama_rak,omitempty" bson:"nama_rak,omitempty"`
+}
+
+type Tahap struct {
+	ID        primitive.ObjectID `json:"id" bson:"_id"`
+	NamaTahap string             `json:"nama_tahap,omitempty" bson:"nama_tahap,omitempty"`
 }
