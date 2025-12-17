@@ -111,6 +111,7 @@ func GetAllCategory(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "Berhasil mengambil semua data kategori",
+		"total":   len(categories),
 		"data":    categories,
 	})
 }
