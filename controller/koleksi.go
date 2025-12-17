@@ -378,22 +378,19 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 
 	collection := config.Ulbimongoconn.Collection("koleksi")
 
-	// =========================
 	// 🔹 Ambil data lama
-	// =========================
 	var existing model.Koleksi
 	if err := collection.FindOne(ctx, bson.M{"_id": koleksiID}).Decode(&existing); err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "Koleksi tidak ditemukan"})
 	}
 
-	// =========================
-	// 🔹 Form Value
-	// =========================
+	// =====================================================
+	// 🔹 FORM VALUE
+	// =====================================================
 	kategoriID := c.FormValue("kategori_id")
 	gudangID := c.FormValue("gudang_id") // WAJIB
-	rakID := c.FormValue("rak_id")       // OPSIONAL
-	tahapID := c.FormValue("tahap_id")   // OPSIONAL
-	hapusFoto := c.FormValue("hapus_foto")
+	rakID := c.FormValue("rak_id")
+	tahapID := c.FormValue("tahap_id")
 
 	noReg := c.FormValue("no_reg")
 	noInv := c.FormValue("no_inv")
@@ -405,9 +402,9 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	deskripsi := c.FormValue("deskripsi")
 	kondisi := c.FormValue("kondisi")
 
-	// =========================
+	// =====================================================
 	// 🔹 KATEGORI
-	// =========================
+	// =====================================================
 	kategori := existing.Kategori
 	if kategoriID != "" {
 		objID, err := primitive.ObjectIDFromHex(kategoriID)
@@ -415,50 +412,47 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 			return c.Status(400).JSON(fiber.Map{"error": "ID kategori tidak valid"})
 		}
 
-		if err := config.Ulbimongoconn.
+		err = config.Ulbimongoconn.
 			Collection("kategori").
 			FindOne(ctx, bson.M{"_id": objID}).
-			Decode(&kategori); err != nil {
+			Decode(&kategori)
+		if err != nil {
 			return c.Status(404).JSON(fiber.Map{"error": "Kategori tidak ditemukan"})
 		}
 	}
 
-	// =========================
+	// =====================================================
 	// 🔹 GUDANG (WAJIB)
-	// =========================
+	// =====================================================
 	if gudangID == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "Gudang wajib diisi"})
 	}
 
 	objGudangID, _ := primitive.ObjectIDFromHex(gudangID)
 	var gudang model.Gudang
-	if err := config.Ulbimongoconn.
-		Collection("gudang").
+	config.Ulbimongoconn.Collection("gudang").
 		FindOne(ctx, bson.M{"_id": objGudangID}).
-		Decode(&gudang); err != nil {
-		return c.Status(404).JSON(fiber.Map{"error": "Gudang tidak ditemukan"})
-	}
+		Decode(&gudang)
 
-	// =========================
+	// =====================================================
 	// 🔹 RAK & TAHAP (OPSIONAL)
-	// =========================
+	// =====================================================
 	var rak model.Rak
 	if rakID != "" {
-		objID, _ := primitive.ObjectIDFromHex(rakID)
+		objRakID, _ := primitive.ObjectIDFromHex(rakID)
 		config.Ulbimongoconn.Collection("rak").
-			FindOne(ctx, bson.M{"_id": objID}).Decode(&rak)
+			FindOne(ctx, bson.M{"_id": objRakID}).
+			Decode(&rak)
 	}
 
 	var tahap model.Tahap
 	if tahapID != "" {
-		objID, _ := primitive.ObjectIDFromHex(tahapID)
+		objTahapID, _ := primitive.ObjectIDFromHex(tahapID)
 		config.Ulbimongoconn.Collection("tahap").
-			FindOne(ctx, bson.M{"_id": objID}).Decode(&tahap)
+			FindOne(ctx, bson.M{"_id": objTahapID}).
+			Decode(&tahap)
 	}
 
-	// =========================
-	// 🔹 TEMPAT PENYIMPANAN
-	// =========================
 	tempatPenyimpanan := model.TempatPenyimpanan{
 		Gudang: gudang,
 	}
@@ -469,57 +463,211 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		tempatPenyimpanan.Tahap = tahap
 	}
 
-	// =========================
-	// 🔹 FOTO LOGIC (INTI)
-	// =========================
-	setData := bson.M{
-		"kategori":           kategori,
-		"no_reg":             ifNotEmpty(noReg, existing.NoRegistrasi),
-		"no_inv":             ifNotEmpty(noInv, existing.NoInventaris),
-		"nama_benda":         ifNotEmpty(namaBenda, existing.NamaBenda),
-		"asal_koleksi":       ifNotEmpty(asalKoleksi, existing.AsalKoleksi),
-		"bahan":              ifNotEmpty(bahan, existing.Bahan),
-		"tempat_perolehan":   ifNotEmpty(tempatPerolehan, existing.TempatPerolehan),
-		"tanggal_perolehan":  ifNotEmpty(tanggalPerolehan, existing.TanggalPerolehan),
-		"deskripsi":          ifNotEmpty(deskripsi, existing.Deskripsi),
-		"kondisi":            ifNotEmpty(kondisi, existing.Kondisi),
-		"tempat_penyimpanan": tempatPenyimpanan,
-		"updated_at":         time.Now(),
-	}
-
+	// =====================================================
+	// 🔹 FOTO (LOGIC PENTING)
+	// =====================================================
+	setData := bson.M{}
 	unsetData := bson.M{}
 
-	// ➕ Upload foto baru
 	file, err := c.FormFile("foto")
 	if err == nil && file != nil {
+		// upload foto baru
 		imageURL, err := uploadImageToGitHub(file, namaBenda)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 		}
 		setData["foto"] = imageURL
+	} else {
+		// tidak upload foto → hapus jika sebelumnya ada
+		if existing.Foto != "" {
+			unsetData["foto"] = ""
+		}
 	}
 
-	// ❌ Hapus foto
-	if hapusFoto == "true" {
-		unsetData["foto"] = ""
-	}
+	// =====================================================
+	// 🔹 UPDATE FIELD LAIN
+	// =====================================================
+	setData["kategori"] = kategori
+	setData["no_reg"] = ifNotEmpty(noReg, existing.NoRegistrasi)
+	setData["no_inv"] = ifNotEmpty(noInv, existing.NoInventaris)
+	setData["nama_benda"] = ifNotEmpty(namaBenda, existing.NamaBenda)
+	setData["asal_koleksi"] = ifNotEmpty(asalKoleksi, existing.AsalKoleksi)
+	setData["bahan"] = ifNotEmpty(bahan, existing.Bahan)
+	setData["tempat_perolehan"] = ifNotEmpty(tempatPerolehan, existing.TempatPerolehan)
+	setData["tanggal_perolehan"] = ifNotEmpty(tanggalPerolehan, existing.TanggalPerolehan)
+	setData["deskripsi"] = ifNotEmpty(deskripsi, existing.Deskripsi)
+	setData["kondisi"] = ifNotEmpty(kondisi, existing.Kondisi)
+	setData["tempat_penyimpanan"] = tempatPenyimpanan
+	setData["updated_at"] = time.Now()
 
 	update := bson.M{"$set": setData}
 	if len(unsetData) > 0 {
 		update["$unset"] = unsetData
 	}
 
-	// =========================
-	// 🔹 UPDATE DB
-	// =========================
-	if _, err := collection.UpdateOne(ctx, bson.M{"_id": koleksiID}, update); err != nil {
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": koleksiID}, update)
+	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Gagal update data"})
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "Koleksi berhasil diperbarui",
-	})
+	return c.JSON(fiber.Map{"message": "Koleksi berhasil diperbarui"})
 }
+
+// func UpdateKoleksi(c *fiber.Ctx) error {
+// 	id := c.Params("id")
+
+// 	koleksiID, err := primitive.ObjectIDFromHex(id)
+// 	if err != nil {
+// 		return c.Status(400).JSON(fiber.Map{"error": "ID koleksi tidak valid"})
+// 	}
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	collection := config.Ulbimongoconn.Collection("koleksi")
+
+// 	// =========================
+// 	// 🔹 Ambil data lama
+// 	// =========================
+// 	var existing model.Koleksi
+// 	if err := collection.FindOne(ctx, bson.M{"_id": koleksiID}).Decode(&existing); err != nil {
+// 		return c.Status(404).JSON(fiber.Map{"error": "Koleksi tidak ditemukan"})
+// 	}
+
+// 	// =========================
+// 	// 🔹 Form Value
+// 	// =========================
+// 	kategoriID := c.FormValue("kategori_id")
+// 	gudangID := c.FormValue("gudang_id") // WAJIB
+// 	rakID := c.FormValue("rak_id")       // OPSIONAL
+// 	tahapID := c.FormValue("tahap_id")   // OPSIONAL
+// 	hapusFoto := c.FormValue("hapus_foto")
+
+// 	noReg := c.FormValue("no_reg")
+// 	noInv := c.FormValue("no_inv")
+// 	namaBenda := c.FormValue("nama_benda")
+// 	asalKoleksi := c.FormValue("asal_koleksi")
+// 	bahan := c.FormValue("bahan")
+// 	tempatPerolehan := c.FormValue("tempat_perolehan")
+// 	tanggalPerolehan := c.FormValue("tanggal_perolehan")
+// 	deskripsi := c.FormValue("deskripsi")
+// 	kondisi := c.FormValue("kondisi")
+
+// 	// =========================
+// 	// 🔹 KATEGORI
+// 	// =========================
+// 	kategori := existing.Kategori
+// 	if kategoriID != "" {
+// 		objID, err := primitive.ObjectIDFromHex(kategoriID)
+// 		if err != nil {
+// 			return c.Status(400).JSON(fiber.Map{"error": "ID kategori tidak valid"})
+// 		}
+
+// 		if err := config.Ulbimongoconn.
+// 			Collection("kategori").
+// 			FindOne(ctx, bson.M{"_id": objID}).
+// 			Decode(&kategori); err != nil {
+// 			return c.Status(404).JSON(fiber.Map{"error": "Kategori tidak ditemukan"})
+// 		}
+// 	}
+
+// 	// =========================
+// 	// 🔹 GUDANG (WAJIB)
+// 	// =========================
+// 	if gudangID == "" {
+// 		return c.Status(400).JSON(fiber.Map{"error": "Gudang wajib diisi"})
+// 	}
+
+// 	objGudangID, _ := primitive.ObjectIDFromHex(gudangID)
+// 	var gudang model.Gudang
+// 	if err := config.Ulbimongoconn.
+// 		Collection("gudang").
+// 		FindOne(ctx, bson.M{"_id": objGudangID}).
+// 		Decode(&gudang); err != nil {
+// 		return c.Status(404).JSON(fiber.Map{"error": "Gudang tidak ditemukan"})
+// 	}
+
+// 	// =========================
+// 	// 🔹 RAK & TAHAP (OPSIONAL)
+// 	// =========================
+// 	var rak model.Rak
+// 	if rakID != "" {
+// 		objID, _ := primitive.ObjectIDFromHex(rakID)
+// 		config.Ulbimongoconn.Collection("rak").
+// 			FindOne(ctx, bson.M{"_id": objID}).Decode(&rak)
+// 	}
+
+// 	var tahap model.Tahap
+// 	if tahapID != "" {
+// 		objID, _ := primitive.ObjectIDFromHex(tahapID)
+// 		config.Ulbimongoconn.Collection("tahap").
+// 			FindOne(ctx, bson.M{"_id": objID}).Decode(&tahap)
+// 	}
+
+// 	// =========================
+// 	// 🔹 TEMPAT PENYIMPANAN
+// 	// =========================
+// 	tempatPenyimpanan := model.TempatPenyimpanan{
+// 		Gudang: gudang,
+// 	}
+// 	if rakID != "" {
+// 		tempatPenyimpanan.Rak = rak
+// 	}
+// 	if tahapID != "" {
+// 		tempatPenyimpanan.Tahap = tahap
+// 	}
+
+// 	// =========================
+// 	// 🔹 FOTO LOGIC (INTI)
+// 	// =========================
+// 	setData := bson.M{
+// 		"kategori":           kategori,
+// 		"no_reg":             ifNotEmpty(noReg, existing.NoRegistrasi),
+// 		"no_inv":             ifNotEmpty(noInv, existing.NoInventaris),
+// 		"nama_benda":         ifNotEmpty(namaBenda, existing.NamaBenda),
+// 		"asal_koleksi":       ifNotEmpty(asalKoleksi, existing.AsalKoleksi),
+// 		"bahan":              ifNotEmpty(bahan, existing.Bahan),
+// 		"tempat_perolehan":   ifNotEmpty(tempatPerolehan, existing.TempatPerolehan),
+// 		"tanggal_perolehan":  ifNotEmpty(tanggalPerolehan, existing.TanggalPerolehan),
+// 		"deskripsi":          ifNotEmpty(deskripsi, existing.Deskripsi),
+// 		"kondisi":            ifNotEmpty(kondisi, existing.Kondisi),
+// 		"tempat_penyimpanan": tempatPenyimpanan,
+// 		"updated_at":         time.Now(),
+// 	}
+
+// 	unsetData := bson.M{}
+
+// 	// ➕ Upload foto baru
+// 	file, err := c.FormFile("foto")
+// 	if err == nil && file != nil {
+// 		imageURL, err := uploadImageToGitHub(file, namaBenda)
+// 		if err != nil {
+// 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+// 		}
+// 		setData["foto"] = imageURL
+// 	}
+
+// 	// ❌ Hapus foto
+// 	if hapusFoto == "true" {
+// 		unsetData["foto"] = ""
+// 	}
+
+// 	update := bson.M{"$set": setData}
+// 	if len(unsetData) > 0 {
+// 		update["$unset"] = unsetData
+// 	}
+
+// 	// =========================
+// 	// 🔹 UPDATE DB
+// 	// =========================
+// 	if _, err := collection.UpdateOne(ctx, bson.M{"_id": koleksiID}, update); err != nil {
+// 		return c.Status(500).JSON(fiber.Map{"error": "Gagal update data"})
+// 	}
+
+// 	return c.JSON(fiber.Map{
+// 		"message": "Koleksi berhasil diperbarui",
+// 	})
+// }
 
 // Fungsi helper agar field kosong tidak menimpa data lama
 func ifNotEmpty(newValue, oldValue string) string {
