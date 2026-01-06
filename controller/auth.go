@@ -495,7 +495,7 @@ func GetUserByUsername(c *fiber.Ctx) error {
 // 	})
 // }
 
-// UPDATE USER BY ID
+// UPDATE USER BY ID (FORM-DATA, TANPA VALIDASI PASSWORD)
 func UpdateUserByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	if idParam == "" {
@@ -504,7 +504,7 @@ func UpdateUserByID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Convert ID ke ObjectID Mongo
+	// Convert ID
 	userID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -520,7 +520,7 @@ func UpdateUserByID(c *fiber.Ctx) error {
 		Database(config.DBUlbimongoinfo.DBName).
 		Collection("users")
 
-	// Cek apakah user ada
+	// Cek user
 	var existingUser model.Users
 	err = usersCollection.FindOne(ctx, bson.M{"_id": userID}).Decode(&existingUser)
 	if err != nil {
@@ -534,25 +534,31 @@ func UpdateUserByID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Parse body yang dikirim
-	var updateData model.Users
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Gagal membaca body request",
-		})
-	}
+	// Ambil data dari form-data
+	username := c.FormValue("username")
+	phone := c.FormValue("phone_number")
+	password := c.FormValue("password")
+	role := c.FormValue("role")
 
 	update := bson.M{}
 
-	// Jika username dikirim
-	if updateData.Username != "" {
-		update["username"] = updateData.Username
+	// ----------------------------
+	// USERNAME → wajib lowercase
+	// ----------------------------
+	if username != "" {
+		lower := strings.ToLower(username)
+		if username != lower {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Username harus huruf kecil semua",
+			})
+		}
+		update["username"] = lower
 	}
 
-	// Jika phone dikirim → validasi
-	if updateData.PhoneNumber != "" {
-		phone := updateData.PhoneNumber
-
+	// ----------------------------
+	// PHONE NUMBER → wajib 62xxx
+	// ----------------------------
+	if phone != "" {
 		if !strings.HasPrefix(phone, "62") {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Format nomor telepon harus dimulai dengan 62",
@@ -574,9 +580,11 @@ func UpdateUserByID(c *fiber.Ctx) error {
 		update["phone_number"] = phone
 	}
 
-	// Jika password dikirim → hash ulang
-	if updateData.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
+	// ----------------------------
+	// PASSWORD → langsung hash saja
+	// ----------------------------
+	if password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"message": "Gagal mengenkripsi password",
@@ -585,12 +593,12 @@ func UpdateUserByID(c *fiber.Ctx) error {
 		update["password"] = string(hashedPassword)
 	}
 
-	// Jika role dikirim (kalau memang boleh diupdate)
-	if updateData.Role != "" {
-		update["role"] = updateData.Role
+	// ROLE (opsional)
+	if role != "" {
+		update["role"] = role
 	}
 
-	// Kalau tidak ada yang diupdate
+	// Jika tidak ada yang dikirim
 	if len(update) == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Tidak ada data yang diupdate",
@@ -598,7 +606,7 @@ func UpdateUserByID(c *fiber.Ctx) error {
 	}
 
 	// Eksekusi update
-	_, err = usersCollection.UpdateOne(
+	res, err := usersCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": userID},
 		bson.M{"$set": update},
@@ -607,6 +615,19 @@ func UpdateUserByID(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Gagal update user",
+		})
+	}
+
+	// Pastikan ada perubahan
+	if res.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User tidak ditemukan",
+		})
+	}
+
+	if res.ModifiedCount == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Tidak ada perubahan data",
 		})
 	}
 

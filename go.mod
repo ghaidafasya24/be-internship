@@ -11,7 +11,6 @@ require (
 	github.com/joho/godotenv v1.5.1
 	go.mongodb.org/mongo-driver v1.17.6
 	golang.org/x/crypto v0.43.0
-	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 )
 
 require (
