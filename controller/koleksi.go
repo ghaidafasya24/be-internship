@@ -378,20 +378,17 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 
 	collection := config.Ulbimongoconn.Collection("koleksi")
 
-	// 🔹 Ambil data lama
+	// Ambil data lama
 	var existing model.Koleksi
 	if err := collection.FindOne(ctx, bson.M{"_id": koleksiID}).Decode(&existing); err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "Koleksi tidak ditemukan"})
 	}
 
-	// =====================================================
-	// 🔹 FORM VALUE
-	// =====================================================
+	// FORM VALUE
 	kategoriID := c.FormValue("kategori_id")
 	gudangID := c.FormValue("gudang_id") // WAJIB
 	rakID := c.FormValue("rak_id")
 	tahapID := c.FormValue("tahap_id")
-
 	noReg := c.FormValue("no_reg")
 	noInv := c.FormValue("no_inv")
 	namaBenda := c.FormValue("nama_benda")
@@ -402,9 +399,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	deskripsi := c.FormValue("deskripsi")
 	kondisi := c.FormValue("kondisi")
 
-	// =====================================================
-	// 🔹 KATEGORI
-	// =====================================================
+	// KATEGORI
 	kategori := existing.Kategori
 	if kategoriID != "" {
 		objID, err := primitive.ObjectIDFromHex(kategoriID)
@@ -421,9 +416,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		}
 	}
 
-	// =====================================================
-	// 🔹 GUDANG (WAJIB)
-	// =====================================================
+	// GUDANG (WAJIB)
 	if gudangID == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "Gudang wajib diisi"})
 	}
@@ -434,9 +427,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		FindOne(ctx, bson.M{"_id": objGudangID}).
 		Decode(&gudang)
 
-	// =====================================================
-	// 🔹 RAK & TAHAP (OPSIONAL)
-	// =====================================================
+	// RAK & TAHAP (OPSIONAL)
 	var rak model.Rak
 	if rakID != "" {
 		objRakID, _ := primitive.ObjectIDFromHex(rakID)
@@ -463,9 +454,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		tempatPenyimpanan.Tahap = tahap
 	}
 
-	// =====================================================
 	// 🔹 FOTO (LOGIC PENTING)
-	// =====================================================
 	setData := bson.M{}
 	unsetData := bson.M{}
 
@@ -484,9 +473,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 		}
 	}
 
-	// =====================================================
 	// 🔹 UPDATE FIELD LAIN
-	// =====================================================
 	setData["kategori"] = kategori
 	setData["no_reg"] = ifNotEmpty(noReg, existing.NoRegistrasi)
 	setData["no_inv"] = ifNotEmpty(noInv, existing.NoInventaris)

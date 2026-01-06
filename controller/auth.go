@@ -256,6 +256,127 @@ func JWTAuth(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// type ResetRequestBody struct {
+// 	Phone string `json:"phone"`
+// }
+
+// func RequestResetPassword(c *fiber.Ctx) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	var body ResetRequestBody
+// 	if err := c.BodyParser(&body); err != nil {
+// 		return c.Status(400).JSON(fiber.Map{"message": "Invalid body"})
+// 	}
+
+// 	if body.Phone == "" {
+// 		return c.Status(400).JSON(fiber.Map{"message": "Phone is required"})
+// 	}
+
+// 	usersCollection := config.Ulbimongoconn.Client().
+// 		Database(config.DBUlbimongoinfo.DBName).
+// 		Collection("users")
+
+// 	var user model.Users
+// 	err := usersCollection.FindOne(ctx, bson.M{"phone_number": body.Phone}).Decode(&user)
+// 	if err != nil {
+// 		return c.Status(404).JSON(fiber.Map{"message": "User not found"})
+// 	}
+
+// 	otp := fmt.Sprintf("%06d", rand.Intn(1000000))
+// 	expiration := time.Now().Add(10 * time.Minute)
+
+// 	_, err = usersCollection.UpdateOne(
+// 		ctx,
+// 		bson.M{"_id": user.ID},
+// 		bson.M{
+// 			"$set": bson.M{
+// 				"reset_otp":    otp,
+// 				"reset_expire": expiration,
+// 			},
+// 		},
+// 	)
+
+// 	if err != nil {
+// 		return c.Status(500).JSON(fiber.Map{"message": "Failed store OTP"})
+// 	}
+
+// 	// === SEND WHATSAPP ===
+// 	err = utils.SendWhatsAuth(body.Phone, "Kode reset password kamu: "+otp)
+// 	if err != nil {
+// 		return c.Status(500).JSON(fiber.Map{
+// 			"message": "Gagal mengirim OTP ke WhatsApp",
+// 			"error":   err.Error(),
+// 		})
+// 	}
+
+// 	return c.JSON(fiber.Map{
+// 		"message": "OTP terkirim ke WhatsApp",
+// 	})
+// }
+
+// type ResetPasswordBody struct {
+// 	Phone    string `json:"phone"`
+// 	OTP      string `json:"otp"`
+// 	Password string `json:"password"`
+// }
+
+// func ResetPassword(c *fiber.Ctx) error {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	var body ResetPasswordBody
+// 	if err := c.BodyParser(&body); err != nil {
+// 		return c.Status(400).JSON(fiber.Map{"message": "Invalid body"})
+// 	}
+
+// 	usersCollection := config.Ulbimongoconn.Client().
+// 		Database(config.DBUlbimongoinfo.DBName).
+// 		Collection("users")
+
+// 	var user model.Users
+// 	err := usersCollection.FindOne(ctx, bson.M{
+// 		"phone_number": body.Phone,
+// 		"reset_otp":    body.OTP,
+// 	}).Decode(&user)
+
+// 	if err != nil {
+// 		return c.Status(400).JSON(fiber.Map{"message": "OTP salah"})
+// 	}
+
+// 	// cek expired
+// 	var result bson.M
+// 	usersCollection.FindOne(ctx, bson.M{"_id": user.ID}).Decode(&result)
+
+// 	if exp, ok := result["reset_expire"].(primitive.DateTime); ok {
+// 		if exp.Time().Before(time.Now()) {
+// 			return c.Status(400).JSON(fiber.Map{"message": "OTP expired"})
+// 		}
+// 	}
+
+// 	hashed, _ := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+
+// 	_, err = usersCollection.UpdateOne(
+// 		ctx,
+// 		bson.M{"_id": user.ID},
+// 		bson.M{
+// 			"$set": bson.M{"password": string(hashed)},
+// 			"$unset": bson.M{
+// 				"reset_otp":    "",
+// 				"reset_expire": "",
+// 			},
+// 		},
+// 	)
+
+// 	if err != nil {
+// 		return c.Status(500).JSON(fiber.Map{"message": "Failed reset password"})
+// 	}
+
+// 	return c.JSON(fiber.Map{
+// 		"message": "Password berhasil direset",
+// 	})
+// }
+
 // GET ALL USERS
 func GetAllUsers(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -374,6 +495,127 @@ func GetUserByUsername(c *fiber.Ctx) error {
 // 	})
 // }
 
+// UPDATE USER BY ID
+func UpdateUserByID(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	if idParam == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID user wajib diisi",
+		})
+	}
+
+	// Convert ID ke ObjectID Mongo
+	userID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "ID user tidak valid",
+		})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	usersCollection := config.
+		Ulbimongoconn.Client().
+		Database(config.DBUlbimongoinfo.DBName).
+		Collection("users")
+
+	// Cek apakah user ada
+	var existingUser model.Users
+	err = usersCollection.FindOne(ctx, bson.M{"_id": userID}).Decode(&existingUser)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"message": "User tidak ditemukan",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal mengambil data user",
+		})
+	}
+
+	// Parse body yang dikirim
+	var updateData model.Users
+	if err := c.BodyParser(&updateData); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Gagal membaca body request",
+		})
+	}
+
+	update := bson.M{}
+
+	// Jika username dikirim
+	if updateData.Username != "" {
+		update["username"] = updateData.Username
+	}
+
+	// Jika phone dikirim → validasi
+	if updateData.PhoneNumber != "" {
+		phone := updateData.PhoneNumber
+
+		if !strings.HasPrefix(phone, "62") {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Format nomor telepon harus dimulai dengan 62",
+			})
+		}
+
+		if len(phone) > 2 && phone[2] == '0' {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Gunakan format 62xxxxxxxx (tanpa 0 setelah 62)",
+			})
+		}
+
+		if len(phone) < 10 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Nomor telepon terlalu pendek",
+			})
+		}
+
+		update["phone_number"] = phone
+	}
+
+	// Jika password dikirim → hash ulang
+	if updateData.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"message": "Gagal mengenkripsi password",
+			})
+		}
+		update["password"] = string(hashedPassword)
+	}
+
+	// Jika role dikirim (kalau memang boleh diupdate)
+	if updateData.Role != "" {
+		update["role"] = updateData.Role
+	}
+
+	// Kalau tidak ada yang diupdate
+	if len(update) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Tidak ada data yang diupdate",
+		})
+	}
+
+	// Eksekusi update
+	_, err = usersCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": userID},
+		bson.M{"$set": update},
+	)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Gagal update user",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User berhasil diupdate",
+		"id":      idParam,
+	})
+}
+
 // DELETE USER BY ID
 func DeleteUserByID(c *fiber.Ctx) error {
 	// Ambil ID dari parameter URL
@@ -397,9 +639,7 @@ func DeleteUserByID(c *fiber.Ctx) error {
 	defer cancel()
 
 	usersCollection := config.
-		Ulbimongoconn.
-		Client().
-		Database(config.DBUlbimongoinfo.DBName).
+		Ulbimongoconn.Client().Database(config.DBUlbimongoinfo.DBName).
 		Collection("users")
 
 	// Cek apakah user ada
