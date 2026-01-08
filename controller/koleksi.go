@@ -17,6 +17,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
 )
 
 // Fungsi utama untuk insert koleksi (pakai form-data)
@@ -37,6 +38,8 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		Tinggi:             c.FormValue("tinggi"),
 		Diameter:           c.FormValue("diameter"),
 		Berat:              c.FormValue("berat"),
+		Satuan:             c.FormValue("satuan"),
+		SatuanBerat:        c.FormValue("satuan_berat"),
 		// CreatedAt:          time.Now(), // ❗ WAJIB
 	}
 	asalKoleksi := c.FormValue("asal_koleksi")
@@ -487,6 +490,22 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	setData["tempat_penyimpanan"] = tempatPenyimpanan
 	setData["updated_at"] = time.Now()
 
+		// 🔹 UPDATE DATA UKURAN
+	// ==========================
+	ukuran := existing.Ukuran
+	ukuran.PanjangKeseluruhan = ifNotEmpty(c.FormValue("panjang_keseluruhan"), existing.Ukuran.PanjangKeseluruhan)
+	ukuran.Lebar = ifNotEmpty(c.FormValue("lebar"), existing.Ukuran.Lebar)
+	ukuran.Tebal = ifNotEmpty(c.FormValue("tebal"), existing.Ukuran.Tebal)
+	ukuran.Tinggi = ifNotEmpty(c.FormValue("tinggi"), existing.Ukuran.Tinggi)
+	ukuran.Diameter = ifNotEmpty(c.FormValue("diameter"), existing.Ukuran.Diameter)
+	ukuran.Berat = ifNotEmpty(c.FormValue("berat"), existing.Ukuran.Berat)
+	ukuran.Satuan = ifNotEmpty(c.FormValue("satuan"), existing.Ukuran.Satuan)
+	ukuran.SatuanBerat = ifNotEmpty(c.FormValue("satuan_berat"), existing.Ukuran.SatuanBerat)
+
+	setData["ukuran"] = ukuran
+
+
+	
 	update := bson.M{"$set": setData}
 	if len(unsetData) > 0 {
 		update["$unset"] = unsetData

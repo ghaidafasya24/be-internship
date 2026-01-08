@@ -495,6 +495,52 @@ func GetUserByUsername(c *fiber.Ctx) error {
 // 	})
 // }
 
+// GET USER BY ID
+func GetUserByID(c *fiber.Ctx) error {
+	idParam := c.Params("id")
+	if idParam == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID wajib diisi",
+		})
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID user tidak valid",
+		})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	collection := config.
+		Ulbimongoconn.Client().
+		Database(config.DBUlbimongoinfo.DBName).
+		Collection("users")
+
+	var user model.Users
+	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "User tidak ditemukan",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal mengambil user",
+		})
+	}
+
+	// Jangan kirim password
+	user.Password = ""
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Success",
+		"data":    user,
+	})
+}
+
 // UPDATE USER BY ID (FORM-DATA, TANPA VALIDASI PASSWORD)
 func UpdateUserByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")

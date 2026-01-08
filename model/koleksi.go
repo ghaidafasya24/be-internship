@@ -25,6 +25,16 @@ type Koleksi struct {
 	CreatedAt         time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
+//	type Ukuran struct {
+//		ID                 primitive.ObjectID `json:"id" bson:"_id"`
+//		Lebar              string             `json:"lebar,omitempty" bson:"lebar,omitempty"`
+//		Tebal              string             `json:"tebal,omitempty" bson:"tebal,omitempty"`
+//		Tinggi             string             `json:"tinggi,omitempty" bson:"tinggi,omitempty"`
+//		Diameter           string             `json:"diameter,omitempty" bson:"diameter,omitempty"`
+//		Berat              string             `json:"berat,omitempty" bson:"berat,omitempty"`
+//		PanjangKeseluruhan string             `json:"panjang_keseluruhan,omitempty" bson:"panjang_keseluruhan,omitempty"`
+//		// CreatedAt          time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
+//	}
 type Ukuran struct {
 	ID                 primitive.ObjectID `json:"id" bson:"_id"`
 	Lebar              string             `json:"lebar,omitempty" bson:"lebar,omitempty"`
@@ -33,6 +43,8 @@ type Ukuran struct {
 	Diameter           string             `json:"diameter,omitempty" bson:"diameter,omitempty"`
 	Berat              string             `json:"berat,omitempty" bson:"berat,omitempty"`
 	PanjangKeseluruhan string             `json:"panjang_keseluruhan,omitempty" bson:"panjang_keseluruhan,omitempty"`
+	Satuan             string             `json:"satuan,omitempty" bson:"satuan,omitempty"`
+	SatuanBerat        string             `json:"satuan_berat,omitempty" bson:"satuan_berat,omitempty"`
 	// CreatedAt          time.Time          `json:"created_at,omitempty" bson:"created_at,omitempty"`
 }
 
