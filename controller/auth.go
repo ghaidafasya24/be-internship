@@ -165,7 +165,7 @@ func Login(c *fiber.Ctx) error {
 	// }
 
 	// Generate JWT Token dengan masa berlaku 30 menit
-	expirationTime := time.Now().Add(30 * time.Minute)
+	expirationTime := time.Now().Add(60 * time.Hour)
 	claims := &Claims{
 		UserID:   user.ID.Hex(),
 		Username: user.Username,

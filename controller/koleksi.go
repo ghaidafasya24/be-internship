@@ -133,25 +133,41 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		}
 	}
 
-	// 🔹 Cek data tahap berdasarkan ID
-	objID, err = primitive.ObjectIDFromHex(tahapID)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID tahap tidak valid.",
-		})
-	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
+	// ======================================================
+	// 🔹 TAHAP OPSIONAL (FIX)
+	// ======================================================
 	var tahap model.Tahap
-	tahapCollection := config.Ulbimongoconn.Collection("tahap")
-	err = tahapCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&tahap)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Data tahap tidak ditemukan.",
-		})
+	if tahapID != "" {
+		objID, err = primitive.ObjectIDFromHex(tahapID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "ID tahap tidak valid.",
+			})
+		}
+
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		tahapCollection := config.Ulbimongoconn.Collection("tahap")
+		err = tahapCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&tahap)
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Data tahap tidak ditemukan.",
+			})
+		}
 	}
+
+	// // 🔹 Cek data tahap berdasarkan ID
+	// objID, err = primitive.ObjectIDFromHex(tahapID)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+	// 		"error": "ID tahap tidak valid.",
+	// 	})
+	// }
+
+	// ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	// defer cancel()
+
 
 	// 🔹 Upload gambar OPSIONAL
 	var imageURL string
@@ -490,7 +506,7 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 	setData["tempat_penyimpanan"] = tempatPenyimpanan
 	setData["updated_at"] = time.Now()
 
-		// 🔹 UPDATE DATA UKURAN
+	// 🔹 UPDATE DATA UKURAN
 	// ==========================
 	ukuran := existing.Ukuran
 	ukuran.PanjangKeseluruhan = ifNotEmpty(c.FormValue("panjang_keseluruhan"), existing.Ukuran.PanjangKeseluruhan)
@@ -504,8 +520,6 @@ func UpdateKoleksi(c *fiber.Ctx) error {
 
 	setData["ukuran"] = ukuran
 
-
-	
 	update := bson.M{"$set": setData}
 	if len(unsetData) > 0 {
 		update["$unset"] = unsetData
