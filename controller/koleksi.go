@@ -19,6 +19,37 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// InsertKoleksi godoc
+// @Summary      Insert Koleksi
+// @Description  Menambahkan data koleksi museum baru, termasuk kategori, gudang, rak, tahap, dan foto. File foto diupload menggunakan form-data.
+// @Tags         Koleksi
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        no_reg             formData string true  "Nomor Registrasi"
+// @Param        no_inv             formData string true  "Nomor Inventaris"
+// @Param        nama_benda         formData string true  "Nama Benda"
+// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: YYYY-MM-DD)"
+// @Param        kategori_id        formData string true  "ID Kategori (MongoDB ObjectID)"
+// @Param        bahan              formData string false "Bahan Benda"
+// @Param        panjang_keseluruhan formData string false "Panjang Keseluruhan (ukuran)"
+// @Param        lebar              formData string false "Lebar (ukuran)"
+// @Param        tebal              formData string false "Tebal (ukuran)"
+// @Param        tinggi             formData string false "Tinggi (ukuran)"
+// @Param        diameter           formData string false "Diameter (ukuran)"
+// @Param        berat              formData string false "Berat (ukuran)"
+// @Param        satuan             formData string false "Satuan ukuran panjang"
+// @Param        satuan_berat       formData string false "Satuan berat"
+// @Param        asal_koleksi       formData string false "Asal Koleksi"
+// @Param        tempat_perolehan   formData string false "Tempat Perolehan"
+// @Param        deskripsi          formData string false "Deskripsi Koleksi"
+// @Param        gudang_id          formData string true  "ID Gudang (MongoDB ObjectID)"
+// @Param        rak_id             formData string false "ID Rak (MongoDB ObjectID)"
+// @Param        tahap_id           formData string false "ID Tahap (MongoDB ObjectID)"
+// @Param        kondisi            formData string false "Kondisi Koleksi"
+// @Param        foto               formData file   false "Upload foto koleksi"
+// @Success      201 {object} map[string]interface{} "Koleksi berhasil disimpan"
+// @Router       /koleksi [post]
+// @Security     BearerAuth
 func InsertKoleksi(c *fiber.Ctx) error {
 
 	noReg := c.FormValue("no_reg")
@@ -396,6 +427,38 @@ func GetKoleksiByID(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateKoleksi godoc
+// @Summary      Update Koleksi
+// @Description  Memperbarui data koleksi museum berdasarkan ID. Semua field bersifat opsional, kecuali "gudang_id" wajib diisi. Jika foto diupload, akan mengganti foto lama.
+// @Tags         Koleksi
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id                 path     string true  "ID Koleksi (MongoDB ObjectID)"
+// @Param        no_reg             formData string false "Nomor Registrasi"
+// @Param        no_inv             formData string false "Nomor Inventaris"
+// @Param        nama_benda         formData string false "Nama Benda"
+// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: YYYY-MM-DD)"
+// @Param        kategori_id        formData string false "ID Kategori (MongoDB ObjectID)"
+// @Param        bahan              formData string false "Bahan Benda"
+// @Param        panjang_keseluruhan formData string false "Panjang Keseluruhan (ukuran)"
+// @Param        lebar              formData string false "Lebar (ukuran)"
+// @Param        tebal              formData string false "Tebal (ukuran)"
+// @Param        tinggi             formData string false "Tinggi (ukuran)"
+// @Param        diameter           formData string false "Diameter (ukuran)"
+// @Param        berat              formData string false "Berat (ukuran)"
+// @Param        satuan             formData string false "Satuan ukuran panjang"
+// @Param        satuan_berat       formData string false "Satuan berat"
+// @Param        asal_koleksi       formData string false "Asal Koleksi"
+// @Param        tempat_perolehan   formData string false "Tempat Perolehan"
+// @Param        deskripsi          formData string false "Deskripsi Koleksi"
+// @Param        gudang_id          formData string true  "ID Gudang (MongoDB ObjectID)"
+// @Param        rak_id             formData string false "ID Rak (MongoDB ObjectID)"
+// @Param        tahap_id           formData string false "ID Tahap (MongoDB ObjectID)"
+// @Param        kondisi            formData string false "Kondisi Koleksi"
+// @Param        foto               formData file   false "Upload foto koleksi (opsional, mengganti foto lama)"
+// @Success      200 {object} map[string]string "Koleksi berhasil diperbarui"
+// @Router       /koleksi/{id} [put]
+// @Security     BearerAuth
 func UpdateKoleksi(c *fiber.Ctx) error {
 	id := c.Params("id")
 

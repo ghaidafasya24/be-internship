@@ -213,6 +213,172 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menambahkan data koleksi museum baru, termasuk kategori, gudang, rak, tahap, dan foto. File foto diupload menggunakan form-data.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Koleksi"
+                ],
+                "summary": "Insert Koleksi",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nomor Registrasi",
+                        "name": "no_reg",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nomor Inventaris",
+                        "name": "no_inv",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nama Benda",
+                        "name": "nama_benda",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tanggal Perolehan (format: YYYY-MM-DD)",
+                        "name": "tanggal_perolehan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Kategori (MongoDB ObjectID)",
+                        "name": "kategori_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bahan Benda",
+                        "name": "bahan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Panjang Keseluruhan (ukuran)",
+                        "name": "panjang_keseluruhan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Lebar (ukuran)",
+                        "name": "lebar",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tebal (ukuran)",
+                        "name": "tebal",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tinggi (ukuran)",
+                        "name": "tinggi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Diameter (ukuran)",
+                        "name": "diameter",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Berat (ukuran)",
+                        "name": "berat",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Satuan ukuran panjang",
+                        "name": "satuan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Satuan berat",
+                        "name": "satuan_berat",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Asal Koleksi",
+                        "name": "asal_koleksi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tempat Perolehan",
+                        "name": "tempat_perolehan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deskripsi Koleksi",
+                        "name": "deskripsi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Gudang (MongoDB ObjectID)",
+                        "name": "gudang_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Rak (MongoDB ObjectID)",
+                        "name": "rak_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Tahap (MongoDB ObjectID)",
+                        "name": "tahap_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Kondisi Koleksi",
+                        "name": "kondisi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload foto koleksi",
+                        "name": "foto",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Koleksi berhasil disimpan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/koleksi/{id}": {
@@ -240,6 +406,177 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Memperbarui data koleksi museum berdasarkan ID. Semua field bersifat opsional, kecuali \"gudang_id\" wajib diisi. Jika foto diupload, akan mengganti foto lama.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Koleksi"
+                ],
+                "summary": "Update Koleksi",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Koleksi (MongoDB ObjectID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nomor Registrasi",
+                        "name": "no_reg",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nomor Inventaris",
+                        "name": "no_inv",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nama Benda",
+                        "name": "nama_benda",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tanggal Perolehan (format: YYYY-MM-DD)",
+                        "name": "tanggal_perolehan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Kategori (MongoDB ObjectID)",
+                        "name": "kategori_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bahan Benda",
+                        "name": "bahan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Panjang Keseluruhan (ukuran)",
+                        "name": "panjang_keseluruhan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Lebar (ukuran)",
+                        "name": "lebar",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tebal (ukuran)",
+                        "name": "tebal",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tinggi (ukuran)",
+                        "name": "tinggi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Diameter (ukuran)",
+                        "name": "diameter",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Berat (ukuran)",
+                        "name": "berat",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Satuan ukuran panjang",
+                        "name": "satuan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Satuan berat",
+                        "name": "satuan_berat",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Asal Koleksi",
+                        "name": "asal_koleksi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tempat Perolehan",
+                        "name": "tempat_perolehan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Deskripsi Koleksi",
+                        "name": "deskripsi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Gudang (MongoDB ObjectID)",
+                        "name": "gudang_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Rak (MongoDB ObjectID)",
+                        "name": "rak_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID Tahap (MongoDB ObjectID)",
+                        "name": "tahap_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Kondisi Koleksi",
+                        "name": "kondisi",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload foto koleksi (opsional, mengganti foto lama)",
+                        "name": "foto",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Koleksi berhasil diperbarui",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -615,7 +952,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "inventorymuseum-de54c3e9b901.herokuapp.com",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "API Koleksi Museum",
+	Title:            "API Pengelolaan Gudang Koleksi Museum",
 	Description:      "Dokumentasi API untuk sistem pengelolaan museum",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

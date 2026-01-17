@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// INSERT KATEGORI (pakai form-data + wajib token)
+// INSERT GUDANG (pakai form-data + wajib token)
 func InsertGudang(c *fiber.Ctx) error {
 	// 🔹 Ambil value dari form-data
 	namaGudang := c.FormValue("nama_gudang")

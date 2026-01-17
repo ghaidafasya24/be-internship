@@ -384,9 +384,8 @@ func GetUserByUsername(c *fiber.Ctx) error {
 // @Success      200  {object}  map[string]interface{}  "User berhasil ditampilkan"
 // @Router       /users/{id} [get]
 func GetUserByID(c *fiber.Ctx) error {
-	// Ambil ID dari URL, trim spasi & quotes
-	idParam := strings.TrimSpace(c.Params("id"))
-	idParam = strings.Trim(idParam, `"`) // hapus quotes jika Swagger menambahkan
+	// Ambil parameter ID dari URL
+	idParam := c.Params("id")
 
 	// Validasi ObjectID
 	objectID, err := primitive.ObjectIDFromHex(idParam)

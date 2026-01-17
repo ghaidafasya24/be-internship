@@ -56,7 +56,7 @@ info:
     name: API Support
     url: https://github.com/ghaidafasya24
   description: Dokumentasi API untuk sistem pengelolaan museum
-  title: API Koleksi Museum
+  title: API Pengelolaan Gudang Koleksi Museum
   version: "1.0"
 paths:
   /kategori:
@@ -189,6 +189,118 @@ paths:
       summary: Get All Koleksi
       tags:
       - Koleksi
+    post:
+      consumes:
+      - multipart/form-data
+      description: Menambahkan data koleksi museum baru, termasuk kategori, gudang,
+        rak, tahap, dan foto. File foto diupload menggunakan form-data.
+      parameters:
+      - description: Nomor Registrasi
+        in: formData
+        name: no_reg
+        required: true
+        type: string
+      - description: Nomor Inventaris
+        in: formData
+        name: no_inv
+        required: true
+        type: string
+      - description: Nama Benda
+        in: formData
+        name: nama_benda
+        required: true
+        type: string
+      - description: 'Tanggal Perolehan (format: YYYY-MM-DD)'
+        in: formData
+        name: tanggal_perolehan
+        type: string
+      - description: ID Kategori (MongoDB ObjectID)
+        in: formData
+        name: kategori_id
+        required: true
+        type: string
+      - description: Bahan Benda
+        in: formData
+        name: bahan
+        type: string
+      - description: Panjang Keseluruhan (ukuran)
+        in: formData
+        name: panjang_keseluruhan
+        type: string
+      - description: Lebar (ukuran)
+        in: formData
+        name: lebar
+        type: string
+      - description: Tebal (ukuran)
+        in: formData
+        name: tebal
+        type: string
+      - description: Tinggi (ukuran)
+        in: formData
+        name: tinggi
+        type: string
+      - description: Diameter (ukuran)
+        in: formData
+        name: diameter
+        type: string
+      - description: Berat (ukuran)
+        in: formData
+        name: berat
+        type: string
+      - description: Satuan ukuran panjang
+        in: formData
+        name: satuan
+        type: string
+      - description: Satuan berat
+        in: formData
+        name: satuan_berat
+        type: string
+      - description: Asal Koleksi
+        in: formData
+        name: asal_koleksi
+        type: string
+      - description: Tempat Perolehan
+        in: formData
+        name: tempat_perolehan
+        type: string
+      - description: Deskripsi Koleksi
+        in: formData
+        name: deskripsi
+        type: string
+      - description: ID Gudang (MongoDB ObjectID)
+        in: formData
+        name: gudang_id
+        required: true
+        type: string
+      - description: ID Rak (MongoDB ObjectID)
+        in: formData
+        name: rak_id
+        type: string
+      - description: ID Tahap (MongoDB ObjectID)
+        in: formData
+        name: tahap_id
+        type: string
+      - description: Kondisi Koleksi
+        in: formData
+        name: kondisi
+        type: string
+      - description: Upload foto koleksi
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Koleksi berhasil disimpan
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Insert Koleksi
+      tags:
+      - Koleksi
   /koleksi/{id}:
     delete:
       description: Menghapus data koleksi berdasarkan ID (wajib autentikasi JWT Bearer)
@@ -223,6 +335,121 @@ paths:
             additionalProperties: true
             type: object
       summary: Get Koleksi By ID
+      tags:
+      - Koleksi
+    put:
+      consumes:
+      - multipart/form-data
+      description: Memperbarui data koleksi museum berdasarkan ID. Semua field bersifat
+        opsional, kecuali "gudang_id" wajib diisi. Jika foto diupload, akan mengganti
+        foto lama.
+      parameters:
+      - description: ID Koleksi (MongoDB ObjectID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nomor Registrasi
+        in: formData
+        name: no_reg
+        type: string
+      - description: Nomor Inventaris
+        in: formData
+        name: no_inv
+        type: string
+      - description: Nama Benda
+        in: formData
+        name: nama_benda
+        type: string
+      - description: 'Tanggal Perolehan (format: YYYY-MM-DD)'
+        in: formData
+        name: tanggal_perolehan
+        type: string
+      - description: ID Kategori (MongoDB ObjectID)
+        in: formData
+        name: kategori_id
+        type: string
+      - description: Bahan Benda
+        in: formData
+        name: bahan
+        type: string
+      - description: Panjang Keseluruhan (ukuran)
+        in: formData
+        name: panjang_keseluruhan
+        type: string
+      - description: Lebar (ukuran)
+        in: formData
+        name: lebar
+        type: string
+      - description: Tebal (ukuran)
+        in: formData
+        name: tebal
+        type: string
+      - description: Tinggi (ukuran)
+        in: formData
+        name: tinggi
+        type: string
+      - description: Diameter (ukuran)
+        in: formData
+        name: diameter
+        type: string
+      - description: Berat (ukuran)
+        in: formData
+        name: berat
+        type: string
+      - description: Satuan ukuran panjang
+        in: formData
+        name: satuan
+        type: string
+      - description: Satuan berat
+        in: formData
+        name: satuan_berat
+        type: string
+      - description: Asal Koleksi
+        in: formData
+        name: asal_koleksi
+        type: string
+      - description: Tempat Perolehan
+        in: formData
+        name: tempat_perolehan
+        type: string
+      - description: Deskripsi Koleksi
+        in: formData
+        name: deskripsi
+        type: string
+      - description: ID Gudang (MongoDB ObjectID)
+        in: formData
+        name: gudang_id
+        required: true
+        type: string
+      - description: ID Rak (MongoDB ObjectID)
+        in: formData
+        name: rak_id
+        type: string
+      - description: ID Tahap (MongoDB ObjectID)
+        in: formData
+        name: tahap_id
+        type: string
+      - description: Kondisi Koleksi
+        in: formData
+        name: kondisi
+        type: string
+      - description: Upload foto koleksi (opsional, mengganti foto lama)
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Koleksi berhasil diperbarui
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Koleksi
       tags:
       - Koleksi
   /users:

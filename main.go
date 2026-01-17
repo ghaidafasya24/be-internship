@@ -16,7 +16,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// @title           API Koleksi Museum
+// @title           API Pengelolaan Gudang Koleksi Museum
 // @version         1.0
 // @description     Dokumentasi API untuk sistem pengelolaan museum
 
