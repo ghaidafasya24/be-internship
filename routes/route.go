@@ -2,23 +2,32 @@ package routes
 
 import (
 	"be-internship/controller"
+	// ← fiberSwagger
+	_ "be-internship/docs" //
+	// ← swaggerFiles
+	// swagger handler
 
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
+
 )
 
 // SetupRoutes initializes all the application routes
 func SetupRoutes(app *fiber.App) {
+	// ===== Swagger route =====
+	app.Get("/swagger/*", fiberSwagger.WrapHandler) // ← versi terbaru fiber-swagger
+
 	// Group API routes
 	api := app.Group("/api")
 
 	// User routes
 	userRoutes := api.Group("/users")
-	userRoutes.Post("/register", controller.Register)          // Route untuk registrasi pengguna
-	userRoutes.Post("/login", controller.Login)                // Route untuk login pengguna
-	userRoutes.Get("/", controller.GetAllUsers)                // Route untuk mengambil data pengguna
-	userRoutes.Get("/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
+	userRoutes.Post("/register", controller.Register)                   // Route untuk registrasi pengguna
+	userRoutes.Post("/login", controller.Login)                         // Route untuk login pengguna
+	userRoutes.Get("/", controller.GetAllUsers)                         // Route untuk mengambil data pengguna
+	userRoutes.Get("/:id", controller.GetUserByID)                   // Route untuk mengambil data pengguna berdasarkan ID
+	userRoutes.Get("/username/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
 	// userRoutes.Get("/:phone_number", controller.GetUserByPhoneNumber)        // Route untuk mengambil data pengguna berdasarkan nomor telepon
-	userRoutes.Get("/:id", controller.GetUserByID)                           // Route untuk mengambil data pengguna berdasarkan ID
 	userRoutes.Put("/:id", controller.JWTAuth, controller.UpdateUserByID)    // Route untuk mengupdate data pengguna berdasarkan ID
 	userRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteUserByID) // Route untuk menghapus data pengguna berdasarkan ID
 	// app.Post("/auth/request-reset", controller.RequestResetPassword)

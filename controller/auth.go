@@ -18,7 +18,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// REGISTER
+// Register godoc
+// @Summary Register
+// @Description Registrasi akun admin.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body model.RegisterRequest true "Payload Body [RAW]"
+// @Success 200 {object} model.Users
+// @Failure 400
+// @Failure 500
+// @Router       /users/register [post]
 func Register(c *fiber.Ctx) error {
 	// Context with timeout for MongoDB operations
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -119,7 +129,17 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// LOGIN
+// Login godoc
+// @Summary      Login
+// @Description  Autentikasi user menggunakan username dan password, kemudian mengembalikan JWT token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        user  body      model.LoginRequest  true  "Data login user"
+// @Success      200   {object}  model.Users
+// @Failure 400
+// @Failure 500
+// @Router       /users/login [post]
 func Login(c *fiber.Ctx) error {
 	// Parse request body
 	var loginData model.Users
@@ -256,128 +276,16 @@ func JWTAuth(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// type ResetRequestBody struct {
-// 	Phone string `json:"phone"`
-// }
-
-// func RequestResetPassword(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
-
-// 	var body ResetRequestBody
-// 	if err := c.BodyParser(&body); err != nil {
-// 		return c.Status(400).JSON(fiber.Map{"message": "Invalid body"})
-// 	}
-
-// 	if body.Phone == "" {
-// 		return c.Status(400).JSON(fiber.Map{"message": "Phone is required"})
-// 	}
-
-// 	usersCollection := config.Ulbimongoconn.Client().
-// 		Database(config.DBUlbimongoinfo.DBName).
-// 		Collection("users")
-
-// 	var user model.Users
-// 	err := usersCollection.FindOne(ctx, bson.M{"phone_number": body.Phone}).Decode(&user)
-// 	if err != nil {
-// 		return c.Status(404).JSON(fiber.Map{"message": "User not found"})
-// 	}
-
-// 	otp := fmt.Sprintf("%06d", rand.Intn(1000000))
-// 	expiration := time.Now().Add(10 * time.Minute)
-
-// 	_, err = usersCollection.UpdateOne(
-// 		ctx,
-// 		bson.M{"_id": user.ID},
-// 		bson.M{
-// 			"$set": bson.M{
-// 				"reset_otp":    otp,
-// 				"reset_expire": expiration,
-// 			},
-// 		},
-// 	)
-
-// 	if err != nil {
-// 		return c.Status(500).JSON(fiber.Map{"message": "Failed store OTP"})
-// 	}
-
-// 	// === SEND WHATSAPP ===
-// 	err = utils.SendWhatsAuth(body.Phone, "Kode reset password kamu: "+otp)
-// 	if err != nil {
-// 		return c.Status(500).JSON(fiber.Map{
-// 			"message": "Gagal mengirim OTP ke WhatsApp",
-// 			"error":   err.Error(),
-// 		})
-// 	}
-
-// 	return c.JSON(fiber.Map{
-// 		"message": "OTP terkirim ke WhatsApp",
-// 	})
-// }
-
-// type ResetPasswordBody struct {
-// 	Phone    string `json:"phone"`
-// 	OTP      string `json:"otp"`
-// 	Password string `json:"password"`
-// }
-
-// func ResetPassword(c *fiber.Ctx) error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
-
-// 	var body ResetPasswordBody
-// 	if err := c.BodyParser(&body); err != nil {
-// 		return c.Status(400).JSON(fiber.Map{"message": "Invalid body"})
-// 	}
-
-// 	usersCollection := config.Ulbimongoconn.Client().
-// 		Database(config.DBUlbimongoinfo.DBName).
-// 		Collection("users")
-
-// 	var user model.Users
-// 	err := usersCollection.FindOne(ctx, bson.M{
-// 		"phone_number": body.Phone,
-// 		"reset_otp":    body.OTP,
-// 	}).Decode(&user)
-
-// 	if err != nil {
-// 		return c.Status(400).JSON(fiber.Map{"message": "OTP salah"})
-// 	}
-
-// 	// cek expired
-// 	var result bson.M
-// 	usersCollection.FindOne(ctx, bson.M{"_id": user.ID}).Decode(&result)
-
-// 	if exp, ok := result["reset_expire"].(primitive.DateTime); ok {
-// 		if exp.Time().Before(time.Now()) {
-// 			return c.Status(400).JSON(fiber.Map{"message": "OTP expired"})
-// 		}
-// 	}
-
-// 	hashed, _ := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
-
-// 	_, err = usersCollection.UpdateOne(
-// 		ctx,
-// 		bson.M{"_id": user.ID},
-// 		bson.M{
-// 			"$set": bson.M{"password": string(hashed)},
-// 			"$unset": bson.M{
-// 				"reset_otp":    "",
-// 				"reset_expire": "",
-// 			},
-// 		},
-// 	)
-
-// 	if err != nil {
-// 		return c.Status(500).JSON(fiber.Map{"message": "Failed reset password"})
-// 	}
-
-// 	return c.JSON(fiber.Map{
-// 		"message": "Password berhasil direset",
-// 	})
-// }
-
-// GET ALL USERS
+// Get All Users godoc
+// @Summary      Get All Users
+// @Description  Endpoint untuk mengambil seluruh data admin yang tersimpan di sistem
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} model.GetAllUsersResponse
+// @Failure 400
+// @Failure 500
+// @Router       /users [get]
 func GetAllUsers(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -419,7 +327,17 @@ func GetAllUsers(c *fiber.Ctx) error {
 	})
 }
 
-// GET USER BY USERNAME
+// GetUserByUsername godoc
+// @Summary      Get User by Username
+// @Description  Mengambil data detail user berdasarkan username tertentu
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        username  path      string  true  "Username"
+// @Success      200  {object}  model.GetAllUsersResponse
+// @Failure 400
+// @Failure 500
+// @Router       /users/username/{username} [get]
 func GetUserByUsername(c *fiber.Ctx) error {
 	username := c.Params("username")
 	if username == "" {
@@ -457,53 +375,20 @@ func GetUserByUsername(c *fiber.Ctx) error {
 	})
 }
 
-// GET USER BY PHONE NUMBER
-// func GetUserByPhoneNumber(c *fiber.Ctx) error {
-// 	phoneNumber := c.Params("phone_number")
-// 	if phoneNumber == "" {
-// 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-// 			"error": "Nomor telepon wajib diisi",
-// 		})
-// 	}
-
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	defer cancel()
-
-// 	usersCollection := config.Ulbimongoconn.Client().
-// 		Database(config.DBUlbimongoinfo.DBName).
-// 		Collection("users")
-
-// 	var user model.Users
-// 	err := usersCollection.FindOne(ctx, bson.M{"phone_number": phoneNumber}).Decode(&user)
-// 	if err != nil {
-// 		if err == mongo.ErrNoDocuments {
-// 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-// 				"error": "User tidak ditemukan",
-// 			})
-// 		}
-// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-// 			"error": "Gagal mengambil data user",
-// 		})
-// 	}
-
-// 	// Hapus password sebelum dikirim
-// 	user.Password = ""
-
-// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-// 		"message": "User ditemukan",
-// 		"data":    user,
-// 	})
-// }
-
-// GET USER BY ID
+// GetUserByID godoc
+// @Summary      Get User by ID
+// @Description  Mengambil data user berdasarkan ID MongoDB
+// @Tags         Users
+// @Produce      json
+// @Param        id   path      string  true  "User ID"
+// @Success      200  {object}  map[string]interface{}  "User berhasil ditampilkan"
+// @Router       /users/{id} [get]
 func GetUserByID(c *fiber.Ctx) error {
-	idParam := c.Params("id")
-	if idParam == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "ID wajib diisi",
-		})
-	}
+	// Ambil ID dari URL, trim spasi & quotes
+	idParam := strings.TrimSpace(c.Params("id"))
+	idParam = strings.Trim(idParam, `"`) // hapus quotes jika Swagger menambahkan
 
+	// Validasi ObjectID
 	objectID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -511,15 +396,13 @@ func GetUserByID(c *fiber.Ctx) error {
 		})
 	}
 
+	// Ambil collection users
+	collection := config.Ulbimongoconn.Collection("users")
+
+	var user model.Users
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	collection := config.
-		Ulbimongoconn.Client().
-		Database(config.DBUlbimongoinfo.DBName).
-		Collection("users")
-
-	var user model.Users
 	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -528,7 +411,7 @@ func GetUserByID(c *fiber.Ctx) error {
 			})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Gagal mengambil user",
+			"error": "Gagal mengambil data user",
 		})
 	}
 
@@ -536,12 +419,23 @@ func GetUserByID(c *fiber.Ctx) error {
 	user.Password = ""
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Success",
+		"message": "User berhasil ditampilkan",
 		"data":    user,
 	})
 }
 
-// UPDATE USER BY ID (FORM-DATA, TANPA VALIDASI PASSWORD)
+// UpdateUserByID godoc
+// @Summary      Update User
+// @Description  Memperbarui data user berdasarkan ID (wajib autentikasi JWT Bearer)
+// @Tags         Users
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id            path      string  true   "ID user"
+// @Param        username      formData  string  false  "Username (huruf kecil semua)"
+// @Param        phone_number  formData  string  false  "Nomor telepon format 62xxxxxxxx"
+// @Param        password      formData  string  false  "Password baru"
+// @Router       /users/{id} [put]
 func UpdateUserByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	if idParam == "" {
@@ -683,7 +577,15 @@ func UpdateUserByID(c *fiber.Ctx) error {
 	})
 }
 
-// DELETE USER BY ID
+// DeleteUserByID godoc
+// @Summary      Delete User
+// @Description  Menghapus data user berdasarkan ID (wajib autentikasi JWT Bearer)
+// @Tags         Users
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path   string  true  "ID user"
+// @Success      200  {object}  map[string]interface{}  "User berhasil dihapus"
+// @Router       /users/{id} [delete]
 func DeleteUserByID(c *fiber.Ctx) error {
 	// Ambil ID dari parameter URL
 	idParam := c.Params("id")

@@ -1,0 +1,402 @@
+basePath: /api
+definitions:
+  model.GetAllUsersResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.Users'
+        type: array
+      message:
+        example: Berhasil mengambil semua data users
+        type: string
+      total:
+        example: 1
+        type: integer
+    type: object
+  model.LoginRequest:
+    properties:
+      password:
+        example: admin12345
+        type: string
+      username:
+        example: ghaida
+        type: string
+    type: object
+  model.RegisterRequest:
+    properties:
+      password:
+        example: admin12345
+        type: string
+      phone_number:
+        example: "6281234567890"
+        type: string
+      username:
+        example: ghaida
+        type: string
+    type: object
+  model.Users:
+    properties:
+      _id:
+        example: "12345678"
+        type: string
+      phone_number:
+        example: "6281234567890"
+        type: string
+      role:
+        example: admin
+        type: string
+      username:
+        example: ghaida
+        type: string
+    type: object
+host: inventorymuseum-de54c3e9b901.herokuapp.com
+info:
+  contact:
+    email: 714220031@std.ulbi.ac.id
+    name: API Support
+    url: https://github.com/ghaidafasya24
+  description: Dokumentasi API untuk sistem pengelolaan museum
+  title: API Koleksi Museum
+  version: "1.0"
+paths:
+  /kategori:
+    get:
+      description: Mengambil semua data kategori koleksi
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get All Kategori
+      tags:
+      - Kategori
+    post:
+      consumes:
+      - multipart/form-data
+      description: Menambahkan data kategori museum menggunakan form-data (wajib token)
+      parameters:
+      - description: Nama kategori
+        in: formData
+        name: nama_kategori
+        required: true
+        type: string
+      - description: Deskripsi kategori
+        in: formData
+        name: deskripsi
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Insert Kategori
+      tags:
+      - Kategori
+  /kategori/{id}:
+    delete:
+      description: Menghapus data kategori berdasarkan ID (wajib autentikasi JWT Bearer)
+      parameters:
+      - description: ID kategori
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Kategori berhasil dihapus
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete Kategori
+      tags:
+      - Kategori
+    get:
+      description: Mengambil satu data kategori koleksi berdasarkan ID
+      parameters:
+      - description: ID Kategori
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Kategori by ID
+      tags:
+      - Kategori
+    put:
+      consumes:
+      - multipart/form-data
+      description: Mengubah data kategori berdasarkan ID. Endpoint ini memerlukan
+        autentikasi JWT Bearer dan menggunakan form-data.
+      parameters:
+      - description: ID Kategori
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nama kategori
+        in: formData
+        name: nama_kategori
+        required: true
+        type: string
+      - description: Deskripsi kategori
+        in: formData
+        name: deskripsi
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Kategori berhasil diperbarui
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Kategori
+      tags:
+      - Kategori
+  /koleksi:
+    get:
+      description: Mengambil semua data koleksi museum beserta kategori, tempat penyimpanan,
+        dan ukuran
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get All Koleksi
+      tags:
+      - Koleksi
+  /koleksi/{id}:
+    delete:
+      description: Menghapus data koleksi berdasarkan ID (wajib autentikasi JWT Bearer)
+      parameters:
+      - description: ID koleksi
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Delete Koleksi by ID
+      tags:
+      - Koleksi
+    get:
+      description: Mengambil satu data koleksi museum berdasarkan ID MongoDB
+      parameters:
+      - description: ID Koleksi
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Koleksi By ID
+      tags:
+      - Koleksi
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint untuk mengambil seluruh data admin yang tersimpan di sistem
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetAllUsersResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get All Users
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Menghapus data user berdasarkan ID (wajib autentikasi JWT Bearer)
+      parameters:
+      - description: ID user
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User berhasil dihapus
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      description: Mengambil data user berdasarkan ID MongoDB
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User berhasil ditampilkan
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get User by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - multipart/form-data
+      description: Memperbarui data user berdasarkan ID (wajib autentikasi JWT Bearer)
+      parameters:
+      - description: ID user
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Username (huruf kecil semua)
+        in: formData
+        name: username
+        type: string
+      - description: Nomor telepon format 62xxxxxxxx
+        in: formData
+        name: phone_number
+        type: string
+      - description: Password baru
+        in: formData
+        name: password
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Update User
+      tags:
+      - Users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentikasi user menggunakan username dan password, kemudian mengembalikan
+        JWT token
+      parameters:
+      - description: Data login user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Users'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Login
+      tags:
+      - Auth
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Registrasi akun admin.
+      parameters:
+      - description: Payload Body [RAW]
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Users'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Register
+      tags:
+      - Auth
+  /users/username/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil data detail user berdasarkan username tertentu
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetAllUsersResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get User by Username
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: 'Masukkan token dengan format: Bearer <JWT Token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

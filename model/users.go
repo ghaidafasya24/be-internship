@@ -5,12 +5,26 @@ import (
 )
 
 type Users struct {
-	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Role        string             `json:"role,omitempty" bson:"role,omitempty"`
-	Username    string             `json:"username,omitempty" bson:"username,omitempty" gorm:"unique;not null"`
-	PhoneNumber string             `json:"phone_number,omitempty" bson:"phone_number,omitempty" gorm:"unique;not null"`
-	Password    string             `json:"password,omitempty" bson:"password,omitempty"`
-	// ConfirmPassword string             `json:"confirm_password,omitempty" bson:"confirm_password,omitempty"`
-	// ResetOTP       string    `json:"reset_otp,omitempty" bson:"reset_otp,omitempty"`
-	// ResetOTPExpire time.Time `json:"reset_otp_expire,omitempty" bson:"reset_otp_expire,omitempty"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" example:"12345678"`
+	Role        string             `json:"role,omitempty" bson:"role,omitempty" example:"admin"`
+	Username    string             `json:"username,omitempty" bson:"username,omitempty" gorm:"unique;not null" example:"ghaida"`
+	PhoneNumber string             `json:"phone_number,omitempty" bson:"phone_number,omitempty" gorm:"unique;not null" example:"6281234567890"`
+	Password    string             `json:"password,omitempty" bson:"password,omitempty" example:"admin12345" swaggerignore:"true"`
+}
+
+type RegisterRequest struct {
+	Username    string `json:"username,omitempty" bson:"username,omitempty" gorm:"unique;not null" example:"ghaida"`
+	PhoneNumber string `json:"phone_number,omitempty" bson:"phone_number,omitempty" gorm:"unique;not null" example:"6281234567890"`
+	Password    string `json:"password,omitempty" bson:"password,omitempty" example:"admin12345"`
+}
+
+type LoginRequest struct {
+	Username string `json:"username" example:"ghaida"`
+	Password string `json:"password" example:"admin12345"`
+}
+
+type GetAllUsersResponse struct {
+	Message string  `json:"message" example:"Berhasil mengambil semua data users"`
+	Total   int     `json:"total" example:"1"`
+	Data    []Users `json:"data"`
 }

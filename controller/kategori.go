@@ -12,7 +12,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// INSERT KATEGORI (pakai form-data + wajib token)
+// InsertKategori godoc
+// @Summary      Insert Kategori
+// @Description  Menambahkan data kategori museum menggunakan form-data (wajib token)
+// @Tags         Kategori
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        nama_kategori  formData  string  true   "Nama kategori"
+// @Param        deskripsi      formData  string  false  "Deskripsi kategori"
+// @Success      201  {object}  map[string]interface{}
+// @Router       /kategori [post]
+// @Security     BearerAuth
 func InsertKategori(c *fiber.Ctx) error {
 
 	// 🔹 Ambil value dari form-data
@@ -65,26 +75,13 @@ func InsertKategori(c *fiber.Ctx) error {
 	})
 }
 
-// // ✅ Fungsi untuk menambahkan kategori baru
-// func InsertCategory(db *mongo.Database, col string, kategori model.Kategori) (primitive.ObjectID, error) {
-// 	// Membuat dokumen BSON untuk disimpan ke MongoDB
-// 	categoryData := bson.M{
-// 		"nama_kategori": kategori.NamaKategori,
-// 		"deskripsi":     kategori.Deskripsi,
-// 	}
-
-// 	// Menyisipkan dokumen ke koleksi
-// 	result, err := db.Collection(col).InsertOne(context.Background(), categoryData)
-// 	if err != nil {
-// 		fmt.Printf("InsertCategory error: %v\n", err)
-// 		return primitive.NilObjectID, err
-// 	}
-
-// 	insertedID := result.InsertedID.(primitive.ObjectID)
-// 	return insertedID, nil
-// }
-
-// GetAllCategory mengambil semua data kategori dari MongoDB
+// GetAllKategori godoc
+// @Summary      Get All Kategori
+// @Description  Mengambil semua data kategori koleksi
+// @Tags         Kategori
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}
+// @Router       /kategori [get]
 func GetAllCategory(c *fiber.Ctx) error {
 	db := config.Ulbimongoconn
 	col := db.Collection("kategori") // nama koleksi MongoDB
@@ -116,6 +113,14 @@ func GetAllCategory(c *fiber.Ctx) error {
 	})
 }
 
+// GetKategoriByID godoc
+// @Summary      Get Kategori by ID
+// @Description  Mengambil satu data kategori koleksi berdasarkan ID
+// @Tags         Kategori
+// @Produce      json
+// @Param        id   path      string  true  "ID Kategori"
+// @Success      200  {object}  map[string]interface{}
+// @Router       /kategori/{id} [get]
 func GetCategoryByID(c *fiber.Ctx) error {
 	// Ambil parameter ID dari URL
 	idParam := c.Params("id")
@@ -143,11 +148,25 @@ func GetCategoryByID(c *fiber.Ctx) error {
 		})
 	}
 
-	// Return hasil
-	return c.Status(fiber.StatusOK).JSON(kategori)
+	// Return hasil dengan pesan sukses
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Kategori dengan ID " + idParam + " berhasil ditampilkan",
+		"data":    kategori,
+	})
 }
 
-// UPDATE KATEGORI (Wajib Token, pakai form-data)
+// UpdateKategori godoc
+// @Summary      Update Kategori
+// @Description  Mengubah data kategori berdasarkan ID. Endpoint ini memerlukan autentikasi JWT Bearer dan menggunakan form-data.
+// @Tags         Kategori
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id             path      string  true   "ID Kategori"
+// @Param        nama_kategori  formData  string  true   "Nama kategori"
+// @Param        deskripsi      formData  string  false  "Deskripsi kategori"
+// @Success      200  {object}  map[string]interface{} "Kategori berhasil diperbarui"
+// @Router       /kategori/{id} [put]
 func UpdateKategori(c *fiber.Ctx) error {
 
 	// ============================
@@ -238,7 +257,15 @@ func UpdateKategori(c *fiber.Ctx) error {
 	})
 }
 
-// DELETE KATEGORI (Wajib Token)
+// DeleteKategoriByID godoc
+// @Summary      Delete Kategori
+// @Description  Menghapus data kategori berdasarkan ID (wajib autentikasi JWT Bearer)
+// @Tags         Kategori
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "ID kategori"
+// @Success      200  {object}  map[string]interface{}  "Kategori berhasil dihapus"
+// @Router       /kategori/{id} [delete]
 func DeleteKategoriByID(c *fiber.Ctx) error {
 
 	// Ambil ID dari parameter
