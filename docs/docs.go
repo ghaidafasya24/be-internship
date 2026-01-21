@@ -220,7 +220,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Menambahkan data koleksi museum baru, termasuk kategori, gudang, rak, tahap, dan foto. File foto diupload menggunakan form-data.",
+                "description": "Menambahkan data koleksi museum baru, termasuk kategori, tempat penyimpanan, ukuran, foto, dan lain-lain",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -255,13 +255,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Tanggal Perolehan (format: YYYY-MM-DD)",
-                        "name": "tanggal_perolehan",
+                        "description": "Deskripsi Koleksi",
+                        "name": "deskripsi",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "ID Kategori (MongoDB ObjectID)",
+                        "description": "ID Kategori",
                         "name": "kategori_id",
                         "in": "formData",
                         "required": true
@@ -270,6 +270,18 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Bahan Benda",
                         "name": "bahan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tempat Perolehan",
+                        "name": "tempat_perolehan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tanggal Perolehan (format: DD-MM-YYYY)",
+                        "name": "tanggal_perolehan",
                         "in": "formData"
                     },
                     {
@@ -304,57 +316,45 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Satuan ukuran keseluruhan (cm/m/dll)",
+                        "name": "satuan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "description": "Berat (ukuran)",
                         "name": "berat",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "Satuan ukuran panjang",
-                        "name": "satuan",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Satuan berat",
+                        "description": "Satuan berat (kg/g/dll)",
                         "name": "satuan_berat",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "Asal Koleksi",
-                        "name": "asal_koleksi",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Tempat Perolehan",
-                        "name": "tempat_perolehan",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Deskripsi Koleksi",
-                        "name": "deskripsi",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "ID Gudang (MongoDB ObjectID)",
+                        "description": "ID Gudang",
                         "name": "gudang_id",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "ID Rak (MongoDB ObjectID)",
+                        "description": "ID Rak",
                         "name": "rak_id",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "ID Tahap (MongoDB ObjectID)",
+                        "description": "ID Tahap",
                         "name": "tahap_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Asal Koleksi",
+                        "name": "asal_koleksi",
                         "in": "formData"
                     },
                     {
@@ -430,7 +430,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ID Koleksi (MongoDB ObjectID)",
+                        "description": "ID Koleksi",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -455,13 +455,13 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Tanggal Perolehan (format: YYYY-MM-DD)",
+                        "description": "Tanggal Perolehan (format: DD-MM-YYYY)",
                         "name": "tanggal_perolehan",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "ID Kategori (MongoDB ObjectID)",
+                        "description": "ID Kategori",
                         "name": "kategori_id",
                         "in": "formData"
                     },
@@ -503,19 +503,19 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Satuan ukuran keseluruhan (cm/m/dll)",
+                        "name": "satuan",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "description": "Berat (ukuran)",
                         "name": "berat",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "Satuan ukuran panjang",
-                        "name": "satuan",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Satuan berat",
+                        "description": "Satuan berat (kg/g/dll)",
                         "name": "satuan_berat",
                         "in": "formData"
                     },
@@ -539,20 +539,20 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "ID Gudang (MongoDB ObjectID)",
+                        "description": "ID Gudang",
                         "name": "gudang_id",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "ID Rak (MongoDB ObjectID)",
+                        "description": "ID Rak",
                         "name": "rak_id",
                         "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "ID Tahap (MongoDB ObjectID)",
+                        "description": "ID Tahap",
                         "name": "tahap_id",
                         "in": "formData"
                     },
@@ -564,7 +564,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "file",
-                        "description": "Upload foto koleksi (opsional, mengganti foto lama)",
+                        "description": "Upload foto koleksi",
                         "name": "foto",
                         "in": "formData"
                     }
@@ -607,6 +607,65 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/rak": {
+            "get": {
+                "description": "Mengambil seluruh data rak dari database MongoDB.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Get All Rak",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/model.GetAllRakResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menambahkan data rak baru ke dalam sistem.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Insert Rak",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nama Rak",
+                        "name": "nama_rak",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data Rak berhasil ditambahkan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Endpoint untuk mengambil seluruh data admin yang tersimpan di sistem",
@@ -638,7 +697,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "Autentikasi user menggunakan username dan password, kemudian mengembalikan JWT token",
+                "description": "Login user dan dapatkan token JWT untuk autentikasi.",
                 "consumes": [
                     "application/json"
                 ],
@@ -664,14 +723,14 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Users"
+                            "$ref": "#/definitions/model.LoginResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
+                    "401": {
+                        "description": "Kredensial tidak valid",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -701,17 +760,17 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Users"
+                            "$ref": "#/definitions/model.RegisterResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
+                    "401": {
+                        "description": "Username already exists",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponseRegister"
+                        }
                     }
                 }
             }
@@ -742,11 +801,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.GetAllUsersResponse"
+                            "$ref": "#/definitions/model.GetUserByUsernameResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "User tidak ditemukan",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -865,6 +930,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "model.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Invalid credentials"
+                }
+            }
+        },
+        "model.ErrorResponseRegister": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Username already exists"
+                }
+            }
+        },
+        "model.GetAllRakResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RakResponseItem"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Berhasil mengambil semua data rak"
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
         "model.GetAllUsersResponse": {
             "type": "object",
             "properties": {
@@ -884,6 +986,18 @@ const docTemplate = `{
                 }
             }
         },
+        "model.GetUserByUsernameResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.Users"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "User ditemukan"
+                }
+            }
+        },
         "model.LoginRequest": {
             "type": "object",
             "properties": {
@@ -894,6 +1008,44 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "ghaida"
+                }
+            }
+        },
+        "model.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "expires": {
+                    "type": "string",
+                    "example": "2026-01-22T15:11:51.917322007Z"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "model.RakResponseItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "693a3a7a416cd8d592b5058e"
+                },
+                "nama_rak": {
+                    "type": "string",
+                    "example": "Rak 2"
                 }
             }
         },
@@ -911,6 +1063,32 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "ghaida"
+                }
+            }
+        },
+        "model.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "User registered successfully"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 201
+                },
+                "user": {
+                    "type": "object",
+                    "properties": {
+                        "_id": {
+                            "type": "string",
+                            "example": "696ef88677f450e9430a144e"
+                        },
+                        "role": {
+                            "type": "string",
+                            "example": "admin"
+                        }
+                    }
                 }
             }
         },

@@ -17,34 +17,35 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
 )
 
 // InsertKoleksi godoc
 // @Summary      Insert Koleksi
-// @Description  Menambahkan data koleksi museum baru, termasuk kategori, gudang, rak, tahap, dan foto. File foto diupload menggunakan form-data.
+// @Description  Menambahkan data koleksi museum baru, termasuk kategori, tempat penyimpanan, ukuran, foto, dan lain-lain
 // @Tags         Koleksi
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        no_reg             formData string true  "Nomor Registrasi"
 // @Param        no_inv             formData string true  "Nomor Inventaris"
 // @Param        nama_benda         formData string true  "Nama Benda"
-// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: YYYY-MM-DD)"
-// @Param        kategori_id        formData string true  "ID Kategori (MongoDB ObjectID)"
+// @Param        deskripsi          formData string false "Deskripsi Koleksi"
+// @Param        kategori_id        formData string true  "ID Kategori"
 // @Param        bahan              formData string false "Bahan Benda"
+// @Param        tempat_perolehan   formData string false "Tempat Perolehan"
+// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: DD-MM-YYYY)"
 // @Param        panjang_keseluruhan formData string false "Panjang Keseluruhan (ukuran)"
 // @Param        lebar              formData string false "Lebar (ukuran)"
 // @Param        tebal              formData string false "Tebal (ukuran)"
 // @Param        tinggi             formData string false "Tinggi (ukuran)"
 // @Param        diameter           formData string false "Diameter (ukuran)"
+// @Param        satuan             formData string false "Satuan ukuran keseluruhan (cm/m/dll)"
 // @Param        berat              formData string false "Berat (ukuran)"
-// @Param        satuan             formData string false "Satuan ukuran panjang"
-// @Param        satuan_berat       formData string false "Satuan berat"
+// @Param        satuan_berat       formData string false "Satuan berat (kg/g/dll)"
+// @Param        gudang_id          formData string true  "ID Gudang"
+// @Param        rak_id             formData string false "ID Rak"
+// @Param        tahap_id           formData string false "ID Tahap"
 // @Param        asal_koleksi       formData string false "Asal Koleksi"
-// @Param        tempat_perolehan   formData string false "Tempat Perolehan"
-// @Param        deskripsi          formData string false "Deskripsi Koleksi"
-// @Param        gudang_id          formData string true  "ID Gudang (MongoDB ObjectID)"
-// @Param        rak_id             formData string false "ID Rak (MongoDB ObjectID)"
-// @Param        tahap_id           formData string false "ID Tahap (MongoDB ObjectID)"
 // @Param        kondisi            formData string false "Kondisi Koleksi"
 // @Param        foto               formData file   false "Upload foto koleksi"
 // @Success      201 {object} map[string]interface{} "Koleksi berhasil disimpan"
@@ -69,12 +70,12 @@ func InsertKoleksi(c *fiber.Ctx) error {
 		Berat:              c.FormValue("berat"),
 		Satuan:             c.FormValue("satuan"),
 		SatuanBerat:        c.FormValue("satuan_berat"),
-		// CreatedAt:          time.Now(), // ❗ WAJIB
 	}
 	asalKoleksi := c.FormValue("asal_koleksi")
 	tempatPerolehan := c.FormValue("tempat_perolehan")
 	deskripsi := c.FormValue("deskripsi")
 	// tempatPenyimpanan := c.FormValue("tempat_penyimpanan")
+	catatan := c.FormValue("catatan")    // 🔹 ambil catatan untuk tempat penyimpanan
 	gudangID := c.FormValue("gudang_id") // 🔹 ambil ID gudang, bukan nama
 	rakID := c.FormValue("rak_id")       // 🔹 ambil ID rak, bukan nama
 	tahapID := c.FormValue("tahap_id")   // 🔹 ambil ID tahap, bukan nama
@@ -125,9 +126,8 @@ func InsertKoleksi(c *fiber.Ctx) error {
 			"error": "ID gudang tidak valid.",
 		})
 	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	// ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	// defer cancel()
 
 	var gudang model.Gudang
 	gudangCollection := config.Ulbimongoconn.Collection("gudang")
@@ -150,8 +150,8 @@ func InsertKoleksi(c *fiber.Ctx) error {
 			})
 		}
 
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+		// ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		// defer cancel()
 
 		rakCollection := config.Ulbimongoconn.Collection("rak")
 		err = rakCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&rak)
@@ -163,7 +163,7 @@ func InsertKoleksi(c *fiber.Ctx) error {
 	}
 
 	// ======================================================
-	// 🔹 TAHAP OPSIONAL (FIX)
+	// 🔹 TAHAP OPSIONAL
 	// ======================================================
 	var tahap model.Tahap
 	if tahapID != "" {
@@ -174,8 +174,8 @@ func InsertKoleksi(c *fiber.Ctx) error {
 			})
 		}
 
-		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+		// ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		// defer cancel()
 
 		tahapCollection := config.Ulbimongoconn.Collection("tahap")
 		err = tahapCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&tahap)
@@ -185,17 +185,6 @@ func InsertKoleksi(c *fiber.Ctx) error {
 			})
 		}
 	}
-
-	// // 🔹 Cek data tahap berdasarkan ID
-	// objID, err = primitive.ObjectIDFromHex(tahapID)
-	// if err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"error": "ID tahap tidak valid.",
-	// 	})
-	// }
-
-	// ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
-	// defer cancel()
 
 	// 🔹 Upload gambar OPSIONAL
 	var imageURL string
@@ -229,7 +218,9 @@ func InsertKoleksi(c *fiber.Ctx) error {
 	// 	})
 	// }
 
-	tempatPenyimpanan := model.TempatPenyimpanan{}
+	tempatPenyimpanan := model.TempatPenyimpanan{
+		Catatan: catatan, 
+	}
 
 	if gudangID != "" {
 		objGudangID, _ := primitive.ObjectIDFromHex(gudangID)
@@ -433,29 +424,29 @@ func GetKoleksiByID(c *fiber.Ctx) error {
 // @Tags         Koleksi
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        id                 path     string true  "ID Koleksi (MongoDB ObjectID)"
+// @Param        id                 path     string true  "ID Koleksi"
 // @Param        no_reg             formData string false "Nomor Registrasi"
 // @Param        no_inv             formData string false "Nomor Inventaris"
 // @Param        nama_benda         formData string false "Nama Benda"
-// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: YYYY-MM-DD)"
-// @Param        kategori_id        formData string false "ID Kategori (MongoDB ObjectID)"
+// @Param        tanggal_perolehan  formData string false "Tanggal Perolehan (format: DD-MM-YYYY)"
+// @Param        kategori_id        formData string false "ID Kategori"
 // @Param        bahan              formData string false "Bahan Benda"
 // @Param        panjang_keseluruhan formData string false "Panjang Keseluruhan (ukuran)"
 // @Param        lebar              formData string false "Lebar (ukuran)"
 // @Param        tebal              formData string false "Tebal (ukuran)"
 // @Param        tinggi             formData string false "Tinggi (ukuran)"
 // @Param        diameter           formData string false "Diameter (ukuran)"
+// @Param        satuan             formData string false "Satuan ukuran keseluruhan (cm/m/dll)"
 // @Param        berat              formData string false "Berat (ukuran)"
-// @Param        satuan             formData string false "Satuan ukuran panjang"
-// @Param        satuan_berat       formData string false "Satuan berat"
+// @Param        satuan_berat       formData string false "Satuan berat (kg/g/dll)"
 // @Param        asal_koleksi       formData string false "Asal Koleksi"
 // @Param        tempat_perolehan   formData string false "Tempat Perolehan"
 // @Param        deskripsi          formData string false "Deskripsi Koleksi"
-// @Param        gudang_id          formData string true  "ID Gudang (MongoDB ObjectID)"
-// @Param        rak_id             formData string false "ID Rak (MongoDB ObjectID)"
-// @Param        tahap_id           formData string false "ID Tahap (MongoDB ObjectID)"
+// @Param        gudang_id          formData string true  "ID Gudang"
+// @Param        rak_id             formData string false "ID Rak"
+// @Param        tahap_id           formData string false "ID Tahap"
 // @Param        kondisi            formData string false "Kondisi Koleksi"
-// @Param        foto               formData file   false "Upload foto koleksi (opsional, mengganti foto lama)"
+// @Param        foto               formData file   false "Upload foto koleksi"
 // @Success      200 {object} map[string]string "Koleksi berhasil diperbarui"
 // @Router       /koleksi/{id} [put]
 // @Security     BearerAuth

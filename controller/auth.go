@@ -25,9 +25,8 @@ import (
 // @Accept json
 // @Produce json
 // @Param request body model.RegisterRequest true "Payload Body [RAW]"
-// @Success 200 {object} model.Users
-// @Failure 400
-// @Failure 500
+// @Success 201 {object}  model.RegisterResponse "OK"
+// @Failure 401 {object}  model.ErrorResponseRegister  "Username already exists"
 // @Router       /users/register [post]
 func Register(c *fiber.Ctx) error {
 	// Context with timeout for MongoDB operations
@@ -131,14 +130,13 @@ type Claims struct {
 
 // Login godoc
 // @Summary      Login
-// @Description  Autentikasi user menggunakan username dan password, kemudian mengembalikan JWT token
+// @Description  Login user dan dapatkan token JWT untuk autentikasi.
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        user  body      model.LoginRequest  true  "Data login user"
-// @Success      200   {object}  model.Users
-// @Failure 400
-// @Failure 500
+// @Success      200   {object}  model.LoginResponse  "OK"
+// @Failure      401   {object}  model.ErrorResponse  "Kredensial tidak valid"
 // @Router       /users/login [post]
 func Login(c *fiber.Ctx) error {
 	// Parse request body
@@ -185,7 +183,7 @@ func Login(c *fiber.Ctx) error {
 	// }
 
 	// Generate JWT Token dengan masa berlaku 30 menit
-	expirationTime := time.Now().Add(60 * time.Hour)
+	expirationTime := time.Now().Add(30 * time.Minute)
 	claims := &Claims{
 		UserID:   user.ID.Hex(),
 		Username: user.Username,
@@ -333,8 +331,9 @@ func GetAllUsers(c *fiber.Ctx) error {
 // @Tags         Users
 // @Accept       json
 // @Produce      json
-// @Param        username  path      string  true  "Username"
-// @Success      200  {object}  model.GetAllUsersResponse
+// @Param        username  path string  true  "Username"
+// @Success      200  {object}  model.GetUserByUsernameResponse "OK"
+// @Failure      404  {object}  model.ErrorResponse "User tidak ditemukan"
 // @Failure 400
 // @Failure 500
 // @Router       /users/username/{username} [get]

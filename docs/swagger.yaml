@@ -1,5 +1,30 @@
 basePath: /api
 definitions:
+  model.ErrorResponse:
+    properties:
+      error:
+        example: Invalid credentials
+        type: string
+    type: object
+  model.ErrorResponseRegister:
+    properties:
+      error:
+        example: Username already exists
+        type: string
+    type: object
+  model.GetAllRakResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.RakResponseItem'
+        type: array
+      message:
+        example: Berhasil mengambil semua data rak
+        type: string
+      total:
+        example: 12
+        type: integer
+    type: object
   model.GetAllUsersResponse:
     properties:
       data:
@@ -13,6 +38,14 @@ definitions:
         example: 1
         type: integer
     type: object
+  model.GetUserByUsernameResponse:
+    properties:
+      data:
+        $ref: '#/definitions/model.Users'
+      message:
+        example: User ditemukan
+        type: string
+    type: object
   model.LoginRequest:
     properties:
       password:
@@ -20,6 +53,33 @@ definitions:
         type: string
       username:
         example: ghaida
+        type: string
+    type: object
+  model.LoginResponse:
+    properties:
+      expires:
+        example: "2026-01-22T15:11:51.917322007Z"
+        type: string
+      message:
+        example: Login successful
+        type: string
+      role:
+        example: admin
+        type: string
+      status:
+        example: 200
+        type: integer
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  model.RakResponseItem:
+    properties:
+      id:
+        example: 693a3a7a416cd8d592b5058e
+        type: string
+      nama_rak:
+        example: Rak 2
         type: string
     type: object
   model.RegisterRequest:
@@ -33,6 +93,24 @@ definitions:
       username:
         example: ghaida
         type: string
+    type: object
+  model.RegisterResponse:
+    properties:
+      message:
+        example: User registered successfully
+        type: string
+      status:
+        example: 201
+        type: integer
+      user:
+        properties:
+          _id:
+            example: 696ef88677f450e9430a144e
+            type: string
+          role:
+            example: admin
+            type: string
+        type: object
     type: object
   model.Users:
     properties:
@@ -192,8 +270,8 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Menambahkan data koleksi museum baru, termasuk kategori, gudang,
-        rak, tahap, dan foto. File foto diupload menggunakan form-data.
+      description: Menambahkan data koleksi museum baru, termasuk kategori, tempat
+        penyimpanan, ukuran, foto, dan lain-lain
       parameters:
       - description: Nomor Registrasi
         in: formData
@@ -210,11 +288,11 @@ paths:
         name: nama_benda
         required: true
         type: string
-      - description: 'Tanggal Perolehan (format: YYYY-MM-DD)'
+      - description: Deskripsi Koleksi
         in: formData
-        name: tanggal_perolehan
+        name: deskripsi
         type: string
-      - description: ID Kategori (MongoDB ObjectID)
+      - description: ID Kategori
         in: formData
         name: kategori_id
         required: true
@@ -222,6 +300,14 @@ paths:
       - description: Bahan Benda
         in: formData
         name: bahan
+        type: string
+      - description: Tempat Perolehan
+        in: formData
+        name: tempat_perolehan
+        type: string
+      - description: 'Tanggal Perolehan (format: DD-MM-YYYY)'
+        in: formData
+        name: tanggal_perolehan
         type: string
       - description: Panjang Keseluruhan (ukuran)
         in: formData
@@ -243,42 +329,34 @@ paths:
         in: formData
         name: diameter
         type: string
+      - description: Satuan ukuran keseluruhan (cm/m/dll)
+        in: formData
+        name: satuan
+        type: string
       - description: Berat (ukuran)
         in: formData
         name: berat
         type: string
-      - description: Satuan ukuran panjang
-        in: formData
-        name: satuan
-        type: string
-      - description: Satuan berat
+      - description: Satuan berat (kg/g/dll)
         in: formData
         name: satuan_berat
         type: string
-      - description: Asal Koleksi
-        in: formData
-        name: asal_koleksi
-        type: string
-      - description: Tempat Perolehan
-        in: formData
-        name: tempat_perolehan
-        type: string
-      - description: Deskripsi Koleksi
-        in: formData
-        name: deskripsi
-        type: string
-      - description: ID Gudang (MongoDB ObjectID)
+      - description: ID Gudang
         in: formData
         name: gudang_id
         required: true
         type: string
-      - description: ID Rak (MongoDB ObjectID)
+      - description: ID Rak
         in: formData
         name: rak_id
         type: string
-      - description: ID Tahap (MongoDB ObjectID)
+      - description: ID Tahap
         in: formData
         name: tahap_id
+        type: string
+      - description: Asal Koleksi
+        in: formData
+        name: asal_koleksi
         type: string
       - description: Kondisi Koleksi
         in: formData
@@ -344,7 +422,7 @@ paths:
         opsional, kecuali "gudang_id" wajib diisi. Jika foto diupload, akan mengganti
         foto lama.
       parameters:
-      - description: ID Koleksi (MongoDB ObjectID)
+      - description: ID Koleksi
         in: path
         name: id
         required: true
@@ -361,11 +439,11 @@ paths:
         in: formData
         name: nama_benda
         type: string
-      - description: 'Tanggal Perolehan (format: YYYY-MM-DD)'
+      - description: 'Tanggal Perolehan (format: DD-MM-YYYY)'
         in: formData
         name: tanggal_perolehan
         type: string
-      - description: ID Kategori (MongoDB ObjectID)
+      - description: ID Kategori
         in: formData
         name: kategori_id
         type: string
@@ -393,15 +471,15 @@ paths:
         in: formData
         name: diameter
         type: string
+      - description: Satuan ukuran keseluruhan (cm/m/dll)
+        in: formData
+        name: satuan
+        type: string
       - description: Berat (ukuran)
         in: formData
         name: berat
         type: string
-      - description: Satuan ukuran panjang
-        in: formData
-        name: satuan
-        type: string
-      - description: Satuan berat
+      - description: Satuan berat (kg/g/dll)
         in: formData
         name: satuan_berat
         type: string
@@ -417,16 +495,16 @@ paths:
         in: formData
         name: deskripsi
         type: string
-      - description: ID Gudang (MongoDB ObjectID)
+      - description: ID Gudang
         in: formData
         name: gudang_id
         required: true
         type: string
-      - description: ID Rak (MongoDB ObjectID)
+      - description: ID Rak
         in: formData
         name: rak_id
         type: string
-      - description: ID Tahap (MongoDB ObjectID)
+      - description: ID Tahap
         in: formData
         name: tahap_id
         type: string
@@ -434,7 +512,7 @@ paths:
         in: formData
         name: kondisi
         type: string
-      - description: Upload foto koleksi (opsional, mengganti foto lama)
+      - description: Upload foto koleksi
         in: formData
         name: foto
         type: file
@@ -452,6 +530,44 @@ paths:
       summary: Update Koleksi
       tags:
       - Koleksi
+  /rak:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil seluruh data rak dari database MongoDB.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/model.GetAllRakResponse'
+      summary: Get All Rak
+      tags:
+      - Data Tempat Penyimpanan
+    post:
+      consumes:
+      - multipart/form-data
+      description: Menambahkan data rak baru ke dalam sistem.
+      parameters:
+      - description: Nama Rak
+        in: formData
+        name: nama_rak
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Data Rak berhasil ditambahkan
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Insert Rak
+      tags:
+      - Data Tempat Penyimpanan
   /users:
     get:
       consumes:
@@ -546,8 +662,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Autentikasi user menggunakan username dan password, kemudian mengembalikan
-        JWT token
+      description: Login user dan dapatkan token JWT untuk autentikasi.
       parameters:
       - description: Data login user
         in: body
@@ -561,11 +676,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Users'
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
+            $ref: '#/definitions/model.LoginResponse'
+        "401":
+          description: Kredensial tidak valid
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
       summary: Login
       tags:
       - Auth
@@ -584,14 +699,14 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "201":
           description: OK
           schema:
-            $ref: '#/definitions/model.Users'
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
+            $ref: '#/definitions/model.RegisterResponse'
+        "401":
+          description: Username already exists
+          schema:
+            $ref: '#/definitions/model.ErrorResponseRegister'
       summary: Register
       tags:
       - Auth
@@ -612,9 +727,13 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.GetAllUsersResponse'
+            $ref: '#/definitions/model.GetUserByUsernameResponse'
         "400":
           description: Bad Request
+        "404":
+          description: User tidak ditemukan
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
       summary: Get User by Username

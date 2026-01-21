@@ -12,7 +12,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// INSERT KATEGORI (pakai form-data + wajib token)
+// InsertRak godoc
+// @Summary      Insert Rak
+// @Description  Menambahkan data rak baru ke dalam sistem.
+// @Tags         Data Tempat Penyimpanan
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        nama_rak  formData string true "Nama Rak"
+// @Success      201 {object} map[string]interface{} "Data Rak berhasil ditambahkan"
+// @Router       /rak [post]
 func InsertRak(c *fiber.Ctx) error {
 	// 🔹 Ambil value dari form-data
 	namaRak := c.FormValue("nama_rak")
@@ -61,7 +70,14 @@ func InsertRak(c *fiber.Ctx) error {
 	})
 }
 
-// GetAllRak mengambil semua data rak dari MongoDB
+// GetAllRak godoc
+// @Summary      Get All Rak
+// @Description  Mengambil seluruh data rak dari database MongoDB.
+// @Tags         Data Tempat Penyimpanan
+// @Accept       json
+// @Produce      json
+// @Success      200 {object} model.GetAllRakResponse "Success"
+// @Router       /rak [get]
 func GetAllRak(c *fiber.Ctx) error {
 	db := config.Ulbimongoconn
 	col := db.Collection("rak") // nama koleksi MongoDB
