@@ -49,6 +49,7 @@ func SetupRoutes(app *fiber.App) {
 	// Gudang routes
 	GudangRoutes := api.Group("/gudang")
 	GudangRoutes.Post("/", controller.JWTAuth, controller.InsertGudang)
+	GudangRoutes.Put("/:id", controller.JWTAuth, controller.UpdateGudangByID)
 	GudangRoutes.Get("/", controller.GetAllGudang)
 	GudangRoutes.Get("/:id", controller.GetGudangByID)
 	GudangRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteGudangByID)
