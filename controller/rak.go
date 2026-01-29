@@ -70,11 +70,88 @@ func InsertRak(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateRakByID godoc
+// @Summary      Update Rak
+// @Description  Memperbarui data rak berdasarkan ID rak
+// @Tags         Data Tempat Penyimpanan
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id        path      string  true  "ID Rak"
+// @Param        nama_rak  formData  string  true  "Nama Rak"
+// @Success      200  {object}  map[string]interface{} "Data rak berhasil diperbarui"
+// @Router       /rak/{id} [put]
+func UpdateRakByID(c *fiber.Ctx) error {
+	// =========================
+	// VALIDASI ID
+	// =========================
+	idParam := c.Params("id")
+	objID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID rak tidak valid",
+		})
+	}
+
+	// =========================
+	// AMBIL FORM DATA
+	// =========================
+	namaRak := c.FormValue("nama_rak")
+	if namaRak == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Nama rak tidak boleh kosong",
+		})
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	rakCollection := config.Ulbimongoconn.Collection("rak")
+
+	// =========================
+	// CEK APAKAH DATA ADA
+	// =========================
+	var existing model.Rak
+	err = rakCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&existing)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Data rak tidak ditemukan",
+		})
+	}
+
+	// =========================
+	// PROSES UPDATE
+	// =========================
+	update := bson.M{
+		"$set": bson.M{
+			"nama_rak": namaRak,
+		},
+	}
+
+	_, err = rakCollection.UpdateOne(ctx, bson.M{"_id": objID}, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Gagal memperbarui data rak",
+		})
+	}
+
+	// =========================
+	// RESPONSE
+	// =========================
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Data rak berhasil diperbarui",
+		"data": fiber.Map{
+			"_id":      objID,
+			"nama_rak": namaRak,
+		},
+	})
+}
+
 // GetAllRak godoc
 // @Summary      Get All Rak
 // @Description  Mengambil seluruh data rak dari database MongoDB.
 // @Tags         Data Tempat Penyimpanan
-// @Accept       json
+// @Accept       multipart/form-data
 // @Produce      json
 // @Success      200 {object} model.GetAllRakResponse "Success"
 // @Router       /rak [get]
@@ -109,6 +186,15 @@ func GetAllRak(c *fiber.Ctx) error {
 	})
 }
 
+// GetRakByID godoc
+// @Summary      Get Rak by ID
+// @Description  Mengambil data rak berdasarkan ID rak
+// @Tags         Data Tempat Penyimpanan
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id   path      string  true  "ID Rak"
+// @Success      200  {object}  model.Rak  "Data rak berhasil ditemukan"
+// @Router       /rak/{id} [get]
 func GetRakByID(c *fiber.Ctx) error {
 	// Ambil parameter ID dari URL
 	idParam := c.Params("id")
@@ -140,6 +226,15 @@ func GetRakByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(rak)
 }
 
+// DeleteRakByID godoc
+// @Summary      Delete Rak by ID
+// @Description  Menghapus data rak berdasarkan ID rak
+// @Tags         Data Tempat Penyimpanan
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id   path      string  true  "ID Rak"
+// @Success      200  {object}  map[string]string "Data rak berhasil dihapus"
+// @Router       /rak/{id} [delete]
 func DeleteRakByID(c *fiber.Ctx) error {
 	// Ambil ID dari parameter
 	idParam := c.Params("id")

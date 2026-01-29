@@ -73,6 +73,13 @@ definitions:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
     type: object
+  model.Rak:
+    properties:
+      id:
+        type: string
+      nama_rak:
+        type: string
+    type: object
   model.RakResponseItem:
     properties:
       id:
@@ -150,7 +157,7 @@ paths:
             type: object
       summary: Get All Kategori
       tags:
-      - Kategori
+      - Data Kategori
     post:
       consumes:
       - multipart/form-data
@@ -177,7 +184,7 @@ paths:
       - BearerAuth: []
       summary: Insert Kategori
       tags:
-      - Kategori
+      - Data Kategori
   /kategori/{id}:
     delete:
       description: Menghapus data kategori berdasarkan ID (wajib autentikasi JWT Bearer)
@@ -199,7 +206,7 @@ paths:
       - BearerAuth: []
       summary: Delete Kategori
       tags:
-      - Kategori
+      - Data Kategori
     get:
       description: Mengambil satu data kategori koleksi berdasarkan ID
       parameters:
@@ -218,7 +225,7 @@ paths:
             type: object
       summary: Get Kategori by ID
       tags:
-      - Kategori
+      - Data Kategori
     put:
       consumes:
       - multipart/form-data
@@ -251,7 +258,7 @@ paths:
       - BearerAuth: []
       summary: Update Kategori
       tags:
-      - Kategori
+      - Data Kategori
   /koleksi:
     get:
       description: Mengambil semua data koleksi museum beserta kategori, tempat penyimpanan,
@@ -266,7 +273,7 @@ paths:
             type: object
       summary: Get All Koleksi
       tags:
-      - Koleksi
+      - Data Koleksi
     post:
       consumes:
       - multipart/form-data
@@ -378,7 +385,7 @@ paths:
       - BearerAuth: []
       summary: Insert Koleksi
       tags:
-      - Koleksi
+      - Data Koleksi
   /koleksi/{id}:
     delete:
       description: Menghapus data koleksi berdasarkan ID (wajib autentikasi JWT Bearer)
@@ -395,7 +402,7 @@ paths:
       - BearerAuth: []
       summary: Delete Koleksi by ID
       tags:
-      - Koleksi
+      - Data Koleksi
     get:
       description: Mengambil satu data koleksi museum berdasarkan ID MongoDB
       parameters:
@@ -414,7 +421,7 @@ paths:
             type: object
       summary: Get Koleksi By ID
       tags:
-      - Koleksi
+      - Data Koleksi
     put:
       consumes:
       - multipart/form-data
@@ -529,11 +536,11 @@ paths:
       - BearerAuth: []
       summary: Update Koleksi
       tags:
-      - Koleksi
+      - Data Koleksi
   /rak:
     get:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Mengambil seluruh data rak dari database MongoDB.
       produces:
       - application/json
@@ -566,6 +573,77 @@ paths:
       security:
       - BearerAuth: []
       summary: Insert Rak
+      tags:
+      - Data Tempat Penyimpanan
+  /rak/{id}:
+    delete:
+      consumes:
+      - multipart/form-data
+      description: Menghapus data rak berdasarkan ID rak
+      parameters:
+      - description: ID Rak
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data rak berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete Rak by ID
+      tags:
+      - Data Tempat Penyimpanan
+    get:
+      consumes:
+      - multipart/form-data
+      description: Mengambil data rak berdasarkan ID rak
+      parameters:
+      - description: ID Rak
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data rak berhasil ditemukan
+          schema:
+            $ref: '#/definitions/model.Rak'
+      summary: Get Rak by ID
+      tags:
+      - Data Tempat Penyimpanan
+    put:
+      consumes:
+      - multipart/form-data
+      description: Memperbarui data rak berdasarkan ID rak
+      parameters:
+      - description: ID Rak
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nama Rak
+        in: formData
+        name: nama_rak
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data rak berhasil diperbarui
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Rak
       tags:
       - Data Tempat Penyimpanan
   /users:

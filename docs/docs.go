@@ -26,7 +26,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Kategori"
+                    "Data Kategori"
                 ],
                 "summary": "Get All Kategori",
                 "responses": {
@@ -53,7 +53,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Kategori"
+                    "Data Kategori"
                 ],
                 "summary": "Insert Kategori",
                 "parameters": [
@@ -89,7 +89,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Kategori"
+                    "Data Kategori"
                 ],
                 "summary": "Get Kategori by ID",
                 "parameters": [
@@ -125,7 +125,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Kategori"
+                    "Data Kategori"
                 ],
                 "summary": "Update Kategori",
                 "parameters": [
@@ -171,7 +171,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Kategori"
+                    "Data Kategori"
                 ],
                 "summary": "Delete Kategori",
                 "parameters": [
@@ -201,7 +201,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Koleksi"
+                    "Data Koleksi"
                 ],
                 "summary": "Get All Koleksi",
                 "responses": {
@@ -228,7 +228,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Koleksi"
+                    "Data Koleksi"
                 ],
                 "summary": "Insert Koleksi",
                 "parameters": [
@@ -388,7 +388,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Koleksi"
+                    "Data Koleksi"
                 ],
                 "summary": "Get Koleksi By ID",
                 "parameters": [
@@ -424,7 +424,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Koleksi"
+                    "Data Koleksi"
                 ],
                 "summary": "Update Koleksi",
                 "parameters": [
@@ -592,7 +592,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Koleksi"
+                    "Data Koleksi"
                 ],
                 "summary": "Delete Koleksi by ID",
                 "parameters": [
@@ -611,7 +611,7 @@ const docTemplate = `{
             "get": {
                 "description": "Mengambil seluruh data rak dari database MongoDB.",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -661,6 +661,114 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/rak/{id}": {
+            "get": {
+                "description": "Mengambil data rak berdasarkan ID rak",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Get Rak by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Rak",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data rak berhasil ditemukan",
+                        "schema": {
+                            "$ref": "#/definitions/model.Rak"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Memperbarui data rak berdasarkan ID rak",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Update Rak",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Rak",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nama Rak",
+                        "name": "nama_rak",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data rak berhasil diperbarui",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Menghapus data rak berdasarkan ID rak",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Delete Rak by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Rak",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data rak berhasil dihapus",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1033,6 +1141,17 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "model.Rak": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "nama_rak": {
+                    "type": "string"
                 }
             }
         },

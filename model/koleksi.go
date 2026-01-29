@@ -15,7 +15,7 @@ type Koleksi struct {
 	NamaBenda         string             `json:"nama_benda,omitempty" bson:"nama_benda,omitempty"`
 	AsalKoleksi       string             `json:"asal_koleksi,omitempty" bson:"asal_koleksi,omitempty"`
 	Bahan             string             `json:"bahan,omitempty" bson:"bahan,omitempty"`
-	Ukuran            Ukuran             `json:"ukuran,omitempty" bson:"ukuran,omitempty"`
+	Ukuran            *Ukuran            `json:"ukuran,omitempty" bson:"ukuran,omitempty"`
 	TempatPerolehan   string             `json:"tempat_perolehan,omitempty" bson:"tempat_perolehan,omitempty"`
 	TanggalPerolehan  string             `json:"tanggal_perolehan,omitempty" bson:"tanggal_perolehan,omitempty"`
 	Deskripsi         string             `json:"deskripsi,omitempty" bson:"deskripsi,omitempty"`

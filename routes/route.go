@@ -48,17 +48,18 @@ func SetupRoutes(app *fiber.App) {
 	kategoriRoutes.Get("/:id", controller.GetCategoryByID)
 	kategoriRoutes.Put("/:id", controller.JWTAuth, controller.UpdateKategori)
 	kategoriRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteKategoriByID)
-
+	
 	// Gudang routes
 	GudangRoutes := api.Group("/gudang")
 	GudangRoutes.Post("/", controller.JWTAuth, controller.InsertGudang)
 	GudangRoutes.Get("/", controller.GetAllGudang)
 	GudangRoutes.Get("/:id", controller.GetGudangByID)
 	GudangRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteGudangByID)
-
+	
 	// Rak routes
 	RakRoutes := api.Group("/rak")
 	RakRoutes.Post("/", controller.JWTAuth, controller.InsertRak)
+	RakRoutes.Put("/:id", controller.JWTAuth, controller.UpdateRakByID)
 	RakRoutes.Get("/", controller.GetAllRak)
 	RakRoutes.Get("/:id", controller.GetRakByID)
 	RakRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteRakByID)

@@ -15,7 +15,7 @@ import (
 // InsertKategori godoc
 // @Summary      Insert Kategori
 // @Description  Menambahkan data kategori museum menggunakan form-data (wajib token)
-// @Tags         Kategori
+// @Tags         Data Kategori
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        nama_kategori  formData  string  true   "Nama kategori"
@@ -78,7 +78,7 @@ func InsertKategori(c *fiber.Ctx) error {
 // GetAllKategori godoc
 // @Summary      Get All Kategori
 // @Description  Mengambil semua data kategori koleksi
-// @Tags         Kategori
+// @Tags         Data Kategori
 // @Produce      json
 // @Success      200  {object}  map[string]interface{}
 // @Router       /kategori [get]
@@ -116,7 +116,7 @@ func GetAllCategory(c *fiber.Ctx) error {
 // GetKategoriByID godoc
 // @Summary      Get Kategori by ID
 // @Description  Mengambil satu data kategori koleksi berdasarkan ID
-// @Tags         Kategori
+// @Tags         Data Kategori
 // @Produce      json
 // @Param        id   path      string  true  "ID Kategori"
 // @Success      200  {object}  map[string]interface{}
@@ -158,7 +158,7 @@ func GetCategoryByID(c *fiber.Ctx) error {
 // UpdateKategori godoc
 // @Summary      Update Kategori
 // @Description  Mengubah data kategori berdasarkan ID. Endpoint ini memerlukan autentikasi JWT Bearer dan menggunakan form-data.
-// @Tags         Kategori
+// @Tags         Data Kategori
 // @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
@@ -260,7 +260,7 @@ func UpdateKategori(c *fiber.Ctx) error {
 // DeleteKategoriByID godoc
 // @Summary      Delete Kategori
 // @Description  Menghapus data kategori berdasarkan ID (wajib autentikasi JWT Bearer)
-// @Tags         Kategori
+// @Tags         Data Kategori
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id   path      string  true  "ID kategori"
