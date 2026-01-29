@@ -3,7 +3,9 @@ package controller
 import (
 	"be-internship/config"
 	"be-internship/model"
+	"regexp"
 	"strings"
+
 	// "be-internship/model"
 	"context"
 	"time"
@@ -14,7 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 // Register godoc
@@ -28,11 +29,9 @@ import (
 // @Failure 401 {object}  model.ErrorResponseRegister  "Username already exists"
 // @Router       /users/register [post]
 func Register(c *fiber.Ctx) error {
-	// Context with timeout for MongoDB operations
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Parse request body into user model
 	var user model.Users
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -40,39 +39,65 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validate required fields
-	// if user.Username == "" || user.Password == "" || user.ConfirmPassword == "" || user.PhoneNumber == "" {
+	// =========================
+	// VALIDASI FIELD WAJIB
+	// =========================
 	if user.Username == "" || user.Password == "" || user.PhoneNumber == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "All fields are required",
 		})
 	}
 
-	// 🔹 VALIDASI FORMAT NOMOR TELEPON (HARUS 62)
-	phone := user.PhoneNumber
+	// =========================
+	// VALIDASI USERNAME
+	// =========================
+	// Minimal 3 karakter
+	if len(user.Username) < 3 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username minimal 3 karakter",
+		})
+	}
 
-	// Harus mulai dengan 62
+	// Hanya huruf kecil, angka, dan underscore
+	usernameRegex := regexp.MustCompile(`^[a-z0-9_]+$`)
+	if !usernameRegex.MatchString(user.Username) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username hanya boleh huruf kecil, angka, dan underscore (_)",
+		})
+	}
+
+	// =========================
+	// VALIDASI PASSWORD
+	// =========================
+	if len(user.Password) < 6 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Password minimal 6 karakter",
+		})
+	}
+
+	// =========================
+	// VALIDASI NO TELEPON (62)
+	// =========================
+	phone := user.PhoneNumber
 	if !strings.HasPrefix(phone, "62") {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Format nomor telepon harus dimulai dengan 62",
 		})
 	}
-
-	// Setelah 62 tidak boleh 0 → 6208... (SALAH)
 	if len(phone) > 2 && phone[2] == '0' {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Format nomor telepon tidak valid, gunakan format: 62xxxxxxxxxx (tanpa angka 0 setelah 62)",
+			"error": "Gunakan format: 62xxxxxxxxxx (tanpa 0 setelah 62)",
 		})
 	}
-
-	// Minimal panjang nomor telepon
 	if len(phone) < 10 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Nomor telepon terlalu pendek",
 		})
 	}
 
-	// Hash the password
+	// =========================
+	// HASH PASSWORD
+	// =========================
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -81,8 +106,13 @@ func Register(c *fiber.Ctx) error {
 	}
 	user.Password = string(hashedPassword)
 
-	// Check if username already exists
-	usersCollection := config.Ulbimongoconn.Client().Database(config.DBUlbimongoinfo.DBName).Collection("users")
+	// =========================
+	// CEK USERNAME DUPLIKAT
+	// =========================
+	usersCollection := config.Ulbimongoconn.Client().
+		Database(config.DBUlbimongoinfo.DBName).
+		Collection("users")
+
 	var existingUser model.Users
 	err = usersCollection.FindOne(ctx, bson.M{"username": user.Username}).Decode(&existingUser)
 	if err == nil {
@@ -91,13 +121,15 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set additional fields
+	// =========================
+	// SET DATA DEFAULT
+	// =========================
 	user.ID = primitive.NewObjectID()
-
-	// Set default role to "admin"
 	user.Role = "admin"
 
-	// Insert the new user into the database
+	// =========================
+	// INSERT DATA
+	// =========================
 	_, err = usersCollection.InsertOne(ctx, user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -105,7 +137,6 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	// Respond with success
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User registered successfully",
 		"status":  201,
@@ -115,7 +146,6 @@ func Register(c *fiber.Ctx) error {
 		},
 	})
 }
-
 
 // Login godoc
 // @Summary      Login
@@ -200,8 +230,6 @@ func Login(c *fiber.Ctx) error {
 		"expires": expirationTime,
 	})
 }
-
-
 
 // Get All Users godoc
 // @Summary      Get All Users
