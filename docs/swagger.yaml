@@ -25,6 +25,19 @@ definitions:
         example: 12
         type: integer
     type: object
+  model.GetAllTahapResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.TahapResponseItem'
+        type: array
+      message:
+        example: Berhasil mengambil semua data tahap
+        type: string
+      total:
+        example: 12
+        type: integer
+    type: object
   model.GetAllUsersResponse:
     properties:
       data:
@@ -118,6 +131,22 @@ definitions:
             example: admin
             type: string
         type: object
+    type: object
+  model.Tahap:
+    properties:
+      id:
+        type: string
+      nama_tahap:
+        type: string
+    type: object
+  model.TahapResponseItem:
+    properties:
+      id:
+        example: 693a3a7a416cd8d59235fsa
+        type: string
+      nama_tahap:
+        example: Tahap 2
+        type: string
     type: object
   model.Users:
     properties:
@@ -644,6 +673,115 @@ paths:
       security:
       - BearerAuth: []
       summary: Update Rak
+      tags:
+      - Data Tempat Penyimpanan
+  /tahap:
+    get:
+      consumes:
+      - application/json
+      description: Mengambil seluruh data tahap penyimpanan dari database MongoDB.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Berhasil mengambil data tahap
+          schema:
+            $ref: '#/definitions/model.GetAllTahapResponse'
+      summary: Get All Tahap
+      tags:
+      - Data Tempat Penyimpanan
+    post:
+      consumes:
+      - multipart/form-data
+      description: Menambahkan data tahap penyimpanan baru ke dalam sistem.
+      parameters:
+      - description: Nama Tahap
+        in: formData
+        name: nama_tahap
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Data tahap berhasil ditambahkan
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Insert Tahap
+      tags:
+      - Data Tempat Penyimpanan
+  /tahap/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Menghapus data tahap penyimpanan berdasarkan ID tahap
+      parameters:
+      - description: ID Tahap
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data tahap berhasil dihapus
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete Tahap by ID
+      tags:
+      - Data Tempat Penyimpanan
+    get:
+      consumes:
+      - application/json
+      description: Mengambil data tahap penyimpanan berdasarkan ID tahap
+      parameters:
+      - description: ID Tahap
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data tahap berhasil ditemukan
+          schema:
+            $ref: '#/definitions/model.Tahap'
+      summary: Get Tahap by ID
+      tags:
+      - Data Tempat Penyimpanan
+    put:
+      consumes:
+      - multipart/form-data
+      description: Memperbarui data tahap penyimpanan berdasarkan ID tahap
+      parameters:
+      - description: ID Tahap
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nama Tahap
+        in: formData
+        name: nama_tahap
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Data tahap berhasil diperbarui
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update Tahap
       tags:
       - Data Tempat Penyimpanan
   /users:

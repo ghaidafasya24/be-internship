@@ -774,6 +774,173 @@ const docTemplate = `{
                 }
             }
         },
+        "/tahap": {
+            "get": {
+                "description": "Mengambil seluruh data tahap penyimpanan dari database MongoDB.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Get All Tahap",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data tahap",
+                        "schema": {
+                            "$ref": "#/definitions/model.GetAllTahapResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menambahkan data tahap penyimpanan baru ke dalam sistem.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Insert Tahap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nama Tahap",
+                        "name": "nama_tahap",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data tahap berhasil ditambahkan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/tahap/{id}": {
+            "get": {
+                "description": "Mengambil data tahap penyimpanan berdasarkan ID tahap",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Get Tahap by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Tahap",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data tahap berhasil ditemukan",
+                        "schema": {
+                            "$ref": "#/definitions/model.Tahap"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Memperbarui data tahap penyimpanan berdasarkan ID tahap",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Update Tahap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Tahap",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nama Tahap",
+                        "name": "nama_tahap",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data tahap berhasil diperbarui",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Menghapus data tahap penyimpanan berdasarkan ID tahap",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan"
+                ],
+                "summary": "Delete Tahap by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Tahap",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data tahap berhasil dihapus",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Endpoint untuk mengambil seluruh data admin yang tersimpan di sistem",
@@ -1075,6 +1242,25 @@ const docTemplate = `{
                 }
             }
         },
+        "model.GetAllTahapResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.TahapResponseItem"
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Berhasil mengambil semua data tahap"
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 12
+                }
+            }
+        },
         "model.GetAllUsersResponse": {
             "type": "object",
             "properties": {
@@ -1208,6 +1394,30 @@ const docTemplate = `{
                             "example": "admin"
                         }
                     }
+                }
+            }
+        },
+        "model.Tahap": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "nama_tahap": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.TahapResponseItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "693a3a7a416cd8d59235fsa"
+                },
+                "nama_tahap": {
+                    "type": "string",
+                    "example": "Tahap 2"
                 }
             }
         },

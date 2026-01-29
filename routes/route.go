@@ -27,11 +27,8 @@ func SetupRoutes(app *fiber.App) {
 	userRoutes.Get("/", controller.GetAllUsers)                         // Route untuk mengambil data pengguna
 	userRoutes.Get("/:id", controller.GetUserByID)                   // Route untuk mengambil data pengguna berdasarkan ID
 	userRoutes.Get("/username/:username", controller.GetUserByUsername) // Route untuk mengambil data pengguna berdasarkan username
-	// userRoutes.Get("/:phone_number", controller.GetUserByPhoneNumber)        // Route untuk mengambil data pengguna berdasarkan nomor telepon
 	userRoutes.Put("/:id", controller.JWTAuth, controller.UpdateUserByID)    // Route untuk mengupdate data pengguna berdasarkan ID
 	userRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteUserByID) // Route untuk menghapus data pengguna berdasarkan ID
-	// app.Post("/auth/request-reset", controller.RequestResetPassword)
-	// app.Post("/auth/reset-password")
 
 	// Koleksi routes
 	koleksiRoutes := api.Group("/koleksi")
@@ -67,6 +64,7 @@ func SetupRoutes(app *fiber.App) {
 	// Tahap routes
 	TahapRoutes := api.Group("/tahap")
 	TahapRoutes.Post("/", controller.JWTAuth, controller.InsertTahap)
+	TahapRoutes.Put("/:id", controller.JWTAuth, controller.UpdateTahapByID)
 	TahapRoutes.Get("/", controller.GetAllTahap)
 	TahapRoutes.Get("/:id", controller.GetTahapByID)
 	TahapRoutes.Delete("/:id", controller.JWTAuth, controller.DeleteTahapByID)
