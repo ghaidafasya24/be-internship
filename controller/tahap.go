@@ -15,7 +15,7 @@ import (
 // InsertTahap godoc
 // @Summary      Insert Tahap
 // @Description  Menambahkan data tahap penyimpanan baru ke dalam sistem.
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Tahap)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
@@ -73,7 +73,7 @@ func InsertTahap(c *fiber.Ctx) error {
 // UpdateTahapByID godoc
 // @Summary      Update Tahap
 // @Description  Memperbarui data tahap penyimpanan berdasarkan ID tahap
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Tahap)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
@@ -150,7 +150,7 @@ func UpdateTahapByID(c *fiber.Ctx) error {
 // GetAllTahap godoc
 // @Summary      Get All Tahap
 // @Description  Mengambil seluruh data tahap penyimpanan dari database MongoDB.
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Tahap)
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  model.GetAllTahapResponse  "Berhasil mengambil data tahap"
@@ -189,7 +189,7 @@ func GetAllTahap(c *fiber.Ctx) error {
 // GetTahapByID godoc
 // @Summary      Get Tahap by ID
 // @Description  Mengambil data tahap penyimpanan berdasarkan ID tahap
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Tahap)
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string  true  "ID Tahap"
@@ -229,7 +229,7 @@ func GetTahapByID(c *fiber.Ctx) error {
 // DeleteTahapByID godoc
 // @Summary      Delete Tahap by ID
 // @Description  Menghapus data tahap penyimpanan berdasarkan ID tahap
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Tahap)
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string  true  "ID Tahap"

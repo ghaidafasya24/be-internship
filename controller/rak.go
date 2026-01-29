@@ -15,7 +15,7 @@ import (
 // InsertRak godoc
 // @Summary      Insert Rak
 // @Description  Menambahkan data rak baru ke dalam sistem.
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Rak)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
@@ -73,7 +73,7 @@ func InsertRak(c *fiber.Ctx) error {
 // UpdateRakByID godoc
 // @Summary      Update Rak
 // @Description  Memperbarui data rak berdasarkan ID rak
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Rak)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Security     BearerAuth
@@ -150,7 +150,7 @@ func UpdateRakByID(c *fiber.Ctx) error {
 // GetAllRak godoc
 // @Summary      Get All Rak
 // @Description  Mengambil seluruh data rak dari database MongoDB.
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Rak)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Success      200 {object} model.GetAllRakResponse "Success"
@@ -189,7 +189,7 @@ func GetAllRak(c *fiber.Ctx) error {
 // GetRakByID godoc
 // @Summary      Get Rak by ID
 // @Description  Mengambil data rak berdasarkan ID rak
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Rak)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        id   path      string  true  "ID Rak"
@@ -229,7 +229,7 @@ func GetRakByID(c *fiber.Ctx) error {
 // DeleteRakByID godoc
 // @Summary      Delete Rak by ID
 // @Description  Menghapus data rak berdasarkan ID rak
-// @Tags         Data Tempat Penyimpanan
+// @Tags         Data Tempat Penyimpanan (Rak)
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        id   path      string  true  "ID Rak"

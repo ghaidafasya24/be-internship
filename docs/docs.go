@@ -19,6 +19,179 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/gudang": {
+            "get": {
+                "description": "Mengambil seluruh data gudang dari database MongoDB",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan (Gudang)"
+                ],
+                "summary": "Get All Gudang",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil semua data gudang",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menambahkan data gudang baru ke dalam sistem",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan (Gudang)"
+                ],
+                "summary": "Insert Gudang",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Nama Gudang",
+                        "name": "nama_gudang",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data gudang berhasil ditambahkan",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/gudang/{id}": {
+            "get": {
+                "description": "Mengambil data gudang berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan (Gudang)"
+                ],
+                "summary": "Get Gudang by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Gudang",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data gudang berhasil ditemukan",
+                        "schema": {
+                            "$ref": "#/definitions/model.Gudang"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Memperbarui data gudang berdasarkan ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan (Gudang)"
+                ],
+                "summary": "Update Gudang by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Gudang",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Nama Gudang",
+                        "name": "nama_gudang",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data gudang berhasil diperbarui",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Menghapus data gudang berdasarkan ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Tempat Penyimpanan (Gudang)"
+                ],
+                "summary": "Delete Gudang by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID Gudang",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data gudang berhasil dihapus",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/kategori": {
             "get": {
                 "description": "Mengambil semua data kategori koleksi",
@@ -617,7 +790,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Rak)"
                 ],
                 "summary": "Get All Rak",
                 "responses": {
@@ -643,7 +816,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Rak)"
                 ],
                 "summary": "Insert Rak",
                 "parameters": [
@@ -676,7 +849,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Rak)"
                 ],
                 "summary": "Get Rak by ID",
                 "parameters": [
@@ -711,7 +884,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Rak)"
                 ],
                 "summary": "Update Rak",
                 "parameters": [
@@ -749,7 +922,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Rak)"
                 ],
                 "summary": "Delete Rak by ID",
                 "parameters": [
@@ -784,7 +957,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Tahap)"
                 ],
                 "summary": "Get All Tahap",
                 "responses": {
@@ -810,7 +983,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Tahap)"
                 ],
                 "summary": "Insert Tahap",
                 "parameters": [
@@ -843,7 +1016,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Tahap)"
                 ],
                 "summary": "Get Tahap by ID",
                 "parameters": [
@@ -878,7 +1051,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Tahap)"
                 ],
                 "summary": "Update Tahap",
                 "parameters": [
@@ -916,7 +1089,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Data Tempat Penyimpanan"
+                    "Data Tempat Penyimpanan (Tahap)"
                 ],
                 "summary": "Delete Tahap by ID",
                 "parameters": [
@@ -1289,6 +1462,17 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "User ditemukan"
+                }
+            }
+        },
+        "model.Gudang": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "nama_gudang": {
+                    "type": "string"
                 }
             }
         },
