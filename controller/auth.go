@@ -5,7 +5,6 @@ import (
 	"be-internship/model"
 	"regexp"
 	"strings"
-
 	// "be-internship/model"
 	"context"
 	"time"
@@ -16,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
+
 )
 
 // Register godoc
@@ -202,7 +202,7 @@ func Login(c *fiber.Ctx) error {
 	// }
 
 	// Generate JWT Token dengan masa berlaku 30 menit
-	expirationTime := time.Now().Add(30 * time.Minute)
+	expirationTime := time.Now().Add(10 * time.Minute) 
 	claims := &Claims{
 		UserID:   user.ID.Hex(),
 		Username: user.Username,
